@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>mocabolka.world</title>
+    
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+
+    <!-- 预加载准备 -->
+    <link rel="prefetch" href="project.html">
+    <link rel="prefetch" href="https://qtqtericchiu.github.io/blog/">
+    <link rel="prefetch" href="gallery.html">
+    <link rel="prefetch" href="contact.html">
+
+    <style>
+        :root {
+            --accent-main: #9ac8e2; 
+            --accent-light: #cce5f4;
+            --glass-bg: rgba(154, 200, 226, 0.03);
+            --glass-border: rgba(154, 200, 226, 0.15);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 解决闪白，全局设定为纯黑底色，并应用 OPPO Sans 4.0 字体 */
+        html {
+            background-color: #000;
+        }
+
+        body, html {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            font-family: "OPPO Sans 4.0", "OPPO Sans", "OPPOSans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #fff;
+            cursor: none; /* 隐藏系统默认光标 */
+        }
+
+        /* =======================================
+         * 全局防闪白黑屏遮罩 (放缓淡出跳转速度)
+         * ======================================= */
+        #page-transition-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; z-index: 99999;
+            pointer-events: none; 
+            /* 进场动画保持原速，快速展示界面 */
+            animation: removeBlackScreen 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes removeBlackScreen {
+            0% { opacity: 1; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* 离场跳转动画：放缓至 0.8 秒 (800ms)，体验更从容优雅 */
+        body.fade-out #page-transition-overlay {
+            animation: none; 
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.8s ease-in-out; 
+        }
+
+        /* =======================================
+         * 定制互动光标系统
+         * ======================================= */
+        #cursor-dot {
+            position: fixed; top: 0; left: 0; width: 6px; height: 6px;
+            background: var(--accent-main); border-radius: 50%;
+            margin: -3px 0 0 -3px; 
+            pointer-events: none; z-index: 99998;
+            transition: width 0.3s, height 0.3s, background-color 0.3s, box-shadow 0.3s, margin 0.3s;
+            will-change: transform;
+            opacity: 0; 
+        }
+        #cursor-ring {
+            position: fixed; top: 0; left: 0; width: 36px; height: 36px;
+            border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%;
+            margin: -18px 0 0 -18px; 
+            pointer-events: none; z-index: 99997;
+            transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s, margin 0.3s;
+            will-change: transform;
+            opacity: 0;
+        }
+        
+        #cursor-dot.hovered {
+            width: 10px; height: 10px; margin: -5px 0 0 -5px;
+            box-shadow: 0 0 15px var(--accent-main); background: #fff;
+        }
+        #cursor-ring.hovered {
+            width: 55px; height: 55px; margin: -27.5px 0 0 -27.5px;
+            background-color: rgba(154, 200, 226, 0.1); border-color: transparent;
+        }
+
+        /* 背景图片与遮罩 */
+        .bg-wrapper {
+            position: absolute; top: -2%; left: -2%; width: 104%; height: 104%; z-index: -2;
+            background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png'); 
+            background-size: cover; background-position: center;
+        }
+        .bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: rgba(5, 5, 5, 0.5); 
+        }
+
+        #particle-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+            pointer-events: none;
+        }
+
+        .entry-points {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+            pointer-events: none; 
+            transition: filter 0.4s ease, opacity 0.4s ease;
+        }
+        .entry-points.blurred {
+            filter: blur(8px); opacity: 0; pointer-events: none !important;
+        }
+
+        /* 修复视差晃动：引入 CSS 变量并使用 backwards 完美移交控制权 */
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translate(calc(-50% + var(--px)), calc(-40% + var(--py))) scale(0.9); }
+            100% { opacity: 1; transform: translate(calc(-50% + var(--px)), calc(-50% + var(--py))) scale(var(--scale)); }
+        }
+
+        .node {
+            --px: 0px; --py: 0px; --scale: 1;
+            /* 使用 backwards: 让动画前保持 0% 状态，动画结束后还原基准 transform 供 JS 修改 */
+            animation: floatIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) backwards;
+            
+            /* 基准变换状态，JS通过修改 --px 和 --py 实现视差晃动 */
+            transform: translate(calc(-50% + var(--px)), calc(-50% + var(--py))) scale(var(--scale));
+            
+            position: absolute; padding: 15px 30px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px;
+            color: var(--accent-light); text-decoration: none; font-weight: 300; letter-spacing: 2px;
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            pointer-events: auto; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s, border-color 0.4s, color 0.4s;
+            cursor: none;
+        }
+
+        .node::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 30px; box-shadow: inset 0 0 20px rgba(154, 200, 226, 0); transition: all 0.4s ease; pointer-events: none;
+        }
+        .node:hover {
+            --scale: 1.05; color: #fff; border-color: var(--accent-main);
+            box-shadow: 0 0 25px rgba(154, 200, 226, 0.25); text-shadow: 0 0 10px var(--accent-main);
+        }
+        .node:hover::before { box-shadow: inset 0 0 20px rgba(154, 200, 226, 0.2); }
+
+        .node:nth-child(1) { top: 20%; left: 20%; animation-delay: 0.1s;}
+        .node:nth-child(2) { top: 75%; left: 15%; animation-delay: 0.3s;}
+        .node:nth-child(3) { top: 50%; left: 50%; font-size: 1.2rem; padding: 20px 40px; animation-delay: 0s;} 
+        .node:nth-child(4) { top: 25%; left: 80%; animation-delay: 0.2s;}
+        .node:nth-child(5) { top: 80%; left: 85%; animation-delay: 0.4s;}
+
+        /* 模态框基础设定 */
+        .about-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95);
+            width: 75vw; height: 75vh; max-width: 1000px; max-height: 700px;
+            background: rgba(10, 15, 20, 0.6); border: 1px solid var(--glass-border); border-radius: 24px;
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
+            z-index: 30; opacity: 0; visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; text-align: center;
+        }
+        .about-modal.active {
+            opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1);
+        }
+        
+        #blogModal { height: auto; max-height: 60vh; max-width: 650px; padding: 40px 30px; }
+
+        .close-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: transparent; border: none; color: var(--accent-light);
+            font-size: 24px; transition: color 0.3s, transform 0.3s;
+            padding: 10px; border-radius: 50%; cursor: none;
+        }
+        .close-btn:hover { color: #fff; transform: rotate(90deg); background: rgba(255,255,255,0.05); }
+
+        .avatar {
+            width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px;
+            border: 2px solid var(--accent-main); padding: 5px;
+            box-shadow: 0 0 30px rgba(154, 200, 226, 0.3); object-fit: cover;
+        }
+        .username { font-size: 2rem; color: #fff; margin-bottom: 10px; font-weight: 500; letter-spacing: 2px;}
+        .bio { font-size: 1rem; color: var(--accent-light); line-height: 1.8; max-width: 80%; font-weight: 300;}
+
+        /* 底部浮动栏 */
+        .bottom-dock {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 40;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+        .toggle-btn {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-radius: 50px; padding: 10px 30px; color: var(--accent-main);
+            font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: none; text-decoration: none; font-family: inherit;
+        }
+        .toggle-btn:hover { background: rgba(154, 200, 226, 0.15); box-shadow: 0 0 15px rgba(154, 200, 226, 0.4); }
+        .toggle-btn svg { transition: transform 0.3s ease; }
+        
+        .dock-panel {
+            background: rgba(10, 10, 10, 0.6); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 20px; padding: 15px 20px; display: flex; gap: 15px;
+            opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); max-width: 90vw; overflow-x: auto; scrollbar-width: none;
+        }
+        .dock-panel::-webkit-scrollbar { display: none; }
+        .dock-panel.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
+        .dock-icon { display: block; width: 45px; height: 45px; border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; flex-shrink: 0; cursor: none;}
+        .dock-icon img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: opacity 0.3s; }
+        .dock-icon:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(154, 200, 226, 0.4); }
+        .dock-icon:hover img { opacity: 1; }
+
+        @media (max-width: 768px) {
+            .node { padding: 12px 20px; font-size: 0.9rem; }
+            .node:nth-child(1) { top: 15%; left: 25%; }
+            .node:nth-child(2) { top: 35%; left: 75%; }
+            .node:nth-child(3) { top: 50%; left: 50%; }
+            .node:nth-child(4) { top: 65%; left: 25%; }
+            .node:nth-child(5) { top: 85%; left: 75%; }
+            .about-modal { width: 90vw; height: 60vh; padding: 20px; }
+            .bio { max-width: 100%; font-size: 0.9rem; }
+            #blogModal { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 纯黑过渡遮罩 -->
+    <div id="page-transition-overlay"></div>
+
+    <!-- 定制交互跟随光标 -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- 背景层 -->
+    <div class="bg-wrapper"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- 散落入口 -->
+    <div class="entry-points" id="entryPoints">
+        <a href="project.html" class="node page-link interactable">作品展示</a>
+        <div id="btn-blog" class="node interactable">个人博客</div>
+        <div id="btn-about" class="node interactable">关于我</div>
+        <a href="gallery.html" class="node page-link interactable">游戏经历</a>
+        <a href="contact.html" class="node page-link interactable">早期经历</a>
+    </div>
+
+    <!-- 关于我 模态框 -->
+    <div class="about-modal" id="aboutModal">
+        <button class="close-btn interactable" id="closeAboutBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <img src="https://raw.githubusercontent.com/qtqtEricChiu/blog/3fa5c596b60aa3cafdec141890b0dc14d96dc317/resources/images/base/avatar.png" alt="Avatar" class="avatar">
+        <h1 class="username">Eric Chiu</h1>
+        <p class="bio">
+            您好，这里是Eric Chiu。<br>
+            本站使用Gemini 3.1 Pro辅助生成。
+        </p>
+        <a href="#resume-placeholder" class="toggle-btn page-link interactable" style="margin-top: 25px; padding: 12px 35px; border-color: var(--accent-main); color: #fff;">
+            个人简历
+        </a>
+    </div>
+
+    <!-- 博客免责提示 模态框 -->
+    <div class="about-modal" id="blogModal">
+        <h2 style="margin-bottom: 20px; font-weight: 500; letter-spacing: 2px;">温馨提示</h2>
+        <p class="bio" style="text-align: justify; max-width: 100%; font-size: 0.95rem; line-height: 1.8;">
+            因为本地系统重装导致无法重新构建，个人博客已于2023年前后停止更新。里面的内容可能并非最新，且不保证有效。3年前的博客内容亦不代表本人当前的观点和立场。<br><br>
+            博客基于 Hexo 及 Nexmoe 框架构建，并基于个人知识对部分源代码进行了改动。
+        </p>
+        <div style="margin-top: 35px; display: flex; gap: 20px; width: 100%; justify-content: center;">
+            <button class="toggle-btn interactable" id="cancelBlogBtn" style="color: #fff; border-color: rgba(255,255,255,0.2);">取消前往</button>
+            <button class="toggle-btn interactable" id="continueBlogBtn" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">继续前往</button>
+        </div>
+    </div>
+
+    <!-- 底部浮动栏 -->
+    <div class="bottom-dock">
+        <div class="dock-panel" id="dockPanel">
+            <a href="#github" class="dock-icon interactable"><img src="https://via.placeholder.com/100/0a1118/9ac8e2?text=Git" alt="GitHub"></a>
+            <a href="#weibo" class="dock-icon interactable"><img src="https://via.placeholder.com/100/0a1118/9ac8e2?text=Wb" alt="Weibo"></a>
+            <a href="#twitter" class="dock-icon interactable"><img src="https://via.placeholder.com/100/0a1118/9ac8e2?text=X" alt="Twitter"></a>
+            <a href="#mail" class="dock-icon interactable"><img src="https://via.placeholder.com/100/0a1118/9ac8e2?text=Mail" alt="Email"></a>
+        </div>
+        <button class="toggle-btn interactable" id="toggleBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+            更多连接
+        </button>
+    </div>
+
+    <script>
+        /* =======================================
+         * 1. 拦截跳转：延迟增至 800ms，等待极慢淡出结束
+         * ======================================= */
+        const pageLinks = document.querySelectorAll('.page-link');
+        pageLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetUrl = link.getAttribute('href');
+                document.body.classList.add('fade-out'); 
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 800); // 增加到800毫秒以配合放缓的CSS变黑动画
+            });
+        });
+
+        /* =======================================
+         * 2. 定制光标系统
+         * ======================================= */
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let isCursorActive = false;
+
+        window.addEventListener('mousemove', (e) => {
+            if(!isCursorActive) {
+                cursorDot.style.opacity = '1';
+                cursorRing.style.opacity = '1';
+                document.body.style.cursor = 'none'; 
+                isCursorActive = true;
+            }
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+        });
+
+        window.addEventListener('touchstart', () => {
+            isCursorActive = false;
+            cursorDot.style.opacity = '0';
+            cursorRing.style.opacity = '0';
+            document.body.style.cursor = 'auto'; 
+        });
+
+        function renderCursor() {
+            if (isCursorActive) {
+                ringX += (mouseX - ringX) * 0.2; 
+                ringY += (mouseY - ringY) * 0.2;
+                cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+            }
+            requestAnimationFrame(renderCursor);
+        }
+        requestAnimationFrame(renderCursor);
+
+        const interactables = document.querySelectorAll('.interactable');
+        interactables.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorDot.classList.add('hovered');
+                cursorRing.classList.add('hovered');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorDot.classList.remove('hovered');
+                cursorRing.classList.remove('hovered');
+            });
+        });
+
+        /* =======================================
+         * 3. 完美修复视差晃动 (通过动态写入 CSS 变量)
+         * ======================================= */
+        const nodes = document.querySelectorAll('.node');
+        window.addEventListener('mousemove', (e) => {
+            // 计算鼠标偏移率 (-1 到 1 之间)
+            const xRatio = (e.clientX / window.innerWidth - 0.5) * 2;
+            const yRatio = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            nodes.forEach((node, index) => {
+                // 不同节点分配不同景深，使得晃动更有错落感
+                const depth = 15 + (index % 3) * 10; 
+                // 直接注入 CSS 变量，与 CSS 中的 translate() 结合
+                node.style.setProperty('--px', `${-xRatio * depth}px`);
+                node.style.setProperty('--py', `${-yRatio * depth}px`);
+            });
+        });
+
+        /* =======================================
+         * 4. UI 联动与弹窗逻辑
+         * ======================================= */
+        const toggleBtn = document.getElementById('toggleBtn');
+        const dockPanel = document.getElementById('dockPanel');
+        const btnSvg = toggleBtn.querySelector('svg');
+        const entryPoints = document.getElementById('entryPoints');
+
+        const aboutModal = document.getElementById('aboutModal');
+        const btnAbout = document.getElementById('btn-about');
+        const closeAboutBtn = document.getElementById('closeAboutBtn');
+
+        const blogModal = document.getElementById('blogModal');
+        const btnBlog = document.getElementById('btn-blog');
+        const cancelBlogBtn = document.getElementById('cancelBlogBtn');
+        const continueBlogBtn = document.getElementById('continueBlogBtn');
+
+        let isDockOpen = false;
+
+        function setDockState(open) {
+            isDockOpen = open;
+            if(isDockOpen) {
+                dockPanel.classList.add('active');
+                btnSvg.style.transform = 'rotate(-90deg)'; 
+                toggleBtn.style.background = 'rgba(154, 200, 226, 0.2)';
+            } else {
+                dockPanel.classList.remove('active');
+                btnSvg.style.transform = 'rotate(0deg)'; 
+                toggleBtn.style.background = 'var(--glass-bg)';
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => setDockState(!isDockOpen));
+
+        btnAbout.addEventListener('click', () => {
+            aboutModal.classList.add('active');
+            entryPoints.classList.add('blurred'); 
+            setDockState(true); 
+        });
+
+        closeAboutBtn.addEventListener('click', () => {
+            aboutModal.classList.remove('active');
+            entryPoints.classList.remove('blurred'); 
+            setDockState(false); 
+        });
+
+        btnBlog.addEventListener('click', () => {
+            blogModal.classList.add('active');
+            entryPoints.classList.add('blurred');
+        });
+
+        cancelBlogBtn.addEventListener('click', () => {
+            blogModal.classList.remove('active');
+            entryPoints.classList.remove('blurred');
+        });
+
+        continueBlogBtn.addEventListener('click', () => {
+            document.body.classList.add('fade-out');
+            setTimeout(() => {
+                window.location.href = 'https://qtqtericchiu.github.io/blog/';
+            }, 800); // 同样适配 800ms
+        });
+
+        /* =======================================
+         * 5. 流体星尘粒子系统与【一键冲击波】
+         * ======================================= */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray =[];
+        let activeMouse = { x: null, y: null };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            activeMouse.x = e.clientX; activeMouse.y = e.clientY;
+        });
+        window.addEventListener('touchmove', (e) => {
+            activeMouse.x = e.touches[0].clientX; activeMouse.y = e.touches[0].clientY;
+        });
+        window.addEventListener('mouseout', () => { activeMouse.x = null; activeMouse.y = null; });
+        window.addEventListener('touchend', () => { activeMouse.x = null; activeMouse.y = null; });
+
+        window.addEventListener('click', (e) => {
+            if (e.target.closest('.interactable') || e.target.closest('.about-modal') || e.target.closest('.bottom-dock')) {
+                return; 
+            }
+            let shockX = e.clientX;
+            let shockY = e.clientY;
+            
+            particlesArray.forEach(p => {
+                let dx = p.x - shockX;
+                let dy = p.y - shockY;
+                let distance = Math.hypot(dx, dy);
+                if(distance === 0) distance = 1;
+                
+                let force = 1200 / distance;
+                if(force > 60) force = 60; 
+                
+                p.vx += (dx / distance) * force;
+                p.vy += (dy / distance) * force;
+                p.baseAlpha = 1; 
+            });
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.baseAlpha = Math.random() * 0.6 + 0.2;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.friction = 0.94; 
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(154, 200, 226, ${this.baseAlpha})`;
+                ctx.fill();
+            }
+
+            update() {
+                let speed = Math.hypot(this.vx, this.vy);
+                
+                if (speed < 3 && activeMouse.x != null && activeMouse.y != null) {
+                    let dx = activeMouse.x - this.x;
+                    let dy = activeMouse.y - this.y;
+                    let distance = Math.hypot(dx, dy);
+                    let maxDist = 350;
+
+                    if (distance < maxDist) {
+                        let force = (maxDist - distance) / maxDist;
+                        if (distance > 40) {
+                            this.vx += (dx / distance) * force * 0.5;
+                            this.vy += (dy / distance) * force * 0.5;
+                        } else {
+                            this.vx -= (dx / distance) * force * 0.8;
+                            this.vy -= (dy / distance) * force * 0.8;
+                        }
+                        this.vx += (-dy / distance) * force * 0.35;
+                        this.vy += (dx / distance) * force * 0.35;
+                        this.baseAlpha = Math.min(this.baseAlpha + 0.05, 1);
+                    } else {
+                        this.baseAlpha = Math.max(this.baseAlpha - 0.01, 0.2);
+                    }
+                } else {
+                    this.baseAlpha = Math.max(this.baseAlpha - 0.01, 0.2);
+                }
+
+                if(speed > 30) {
+                    this.vx = (this.vx / speed) * 30;
+                    this.vy = (this.vy / speed) * 30;
+                }
+
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+
+                if (Math.abs(this.vx) < 0.1) this.vx += (Math.random() - 0.5) * 0.2;
+                if (Math.abs(this.vy) < 0.1) this.vy += (Math.random() - 0.5) * 0.2;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0) this.x = canvas.width;
+                else if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                else if (this.y > canvas.height) this.y = 0;
+
+                this.draw();
+            }
+        }
+
+        function initParticles() {
+            particlesArray =[];
+            let num = Math.floor((canvas.width * canvas.height) / 6000);
+            if(num > 350) num = 350;
+            for (let i = 0; i < num; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+        }
+
+        initParticles();
+        animate();
+
+    </script>
+</body>
+</html>
