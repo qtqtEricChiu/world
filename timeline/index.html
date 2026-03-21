@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>游戏经历 - mocabolka.world</title>
+    
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+    <link rel="prefetch" href="../">
+
+    <style>
+        :root {
+            --accent-main: #9ac8e2;
+            --accent-light: #cce5f4;
+            --accent-dark: #7ab0d1;
+            --glass-bg: rgba(10, 15, 20, 0.85);
+            --glass-border: rgba(154, 200, 226, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { background-color: #000; }
+        body, html { width: 100%; height: 100%; overflow: hidden; font-family: "OPPO Sans 4.0", "OPPO Sans", sans-serif; color: #fff; cursor: none; perspective: 1500px; }
+
+        #page-transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes removeBlackScreen { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        body.fade-out #page-transition-overlay { animation: none; visibility: visible; opacity: 1; transition: opacity 0.8s ease-in-out; }
+
+        /* 修复1：完全按照提供的index.html重构光标样式，移除影响灵敏度的transition */
+        #cursor-dot, #cursor-ring {
+            position: fixed; pointer-events: none; z-index: 99998;
+            will-change: transform; /* 保留will-change优化性能 */
+        }
+        #cursor-dot {
+            width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%;
+            margin: -3px 0 0 -3px; opacity: 0;
+            /* 关键修改：移除所有CSS transition，让JS完全控制 */
+        }
+        #cursor-ring {
+            width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%;
+            margin: -18px 0 0 -18px; opacity: 0;
+            /* 关键修改：移除所有CSS transition */
+        }
+        #cursor-dot.hovered { width: 10px; height: 10px; margin: -5px 0 0 -5px; box-shadow: 0 0 15px var(--accent-main); background: #fff; }
+        #cursor-ring.hovered { width: 55px; height: 55px; margin: -27.5px 0 0 -27.5px; background-color: rgba(154, 200, 226, 0.1); border-color: transparent; }
+
+        /* 背景控制 */
+        .bg-wrapper { position: absolute; top: -2%; left: -2%; width: 104%; height: 104%; z-index: -2; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; }
+        .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(5, 5, 5, 0.5); }
+        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        /* 背景切换器 */
+        .bg-switcher {
+            position: fixed; top: 30px; right: 40px; z-index: 100;
+            display: flex; gap: 10px; padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            opacity: 1;
+        }
+        .sw-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); cursor: none; background-size: cover; background-position: center; transition: transform 0.3s, border-color 0.3s; }
+        .sw-btn:hover { transform: scale(1.1); border-color: var(--accent-main); }
+        .sw-btn.active { border-color: var(--accent-main); box-shadow: 0 0 10px var(--accent-main); }
+
+        /* 返回主页按钮 */
+        .top-nav { position: fixed; top: 30px; left: 40px; z-index: 100; display: flex; align-items: center; opacity: 1; }
+        .back-btn {
+            display: flex; align-items: center; gap: 10px;
+            color: var(--accent-light); text-decoration: none; font-size: 1.1rem; letter-spacing: 2px;
+            padding: 8px 16px; border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(154, 200, 226, 0.1);
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover { color: #fff; transform: translateX(-5px); border-color: var(--accent-main); background: rgba(154, 200, 226, 0.1); }
+
+        /* ====== 正文容器 ====== */
+        .card-wrapper {
+            position: relative; width: 85vw; max-width: 1000px; height: 78vh; margin: 12vh auto 0;
+            z-index: 10; opacity: 0; animation: floatUpIn 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            transform-style: preserve-3d; will-change: transform;
+        }
+        @keyframes floatUpIn { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        /* 高斯模糊背景容器 - 已修复 */
+        .content-container {
+            width: 100%; height: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 0 30px rgba(154, 200, 226, 0.05);
+            padding: 50px 60px; overflow-y: auto;
+            isolation: isolate;
+        }
+        .content-container::-webkit-scrollbar { width: 6px; }
+        .content-container::-webkit-scrollbar-thumb { background: rgba(154, 200, 226, 0.3); border-radius: 10px; }
+        .content-container::-webkit-scrollbar-thumb:hover { background: rgba(154, 200, 226, 0.5); }
+
+        .page-title {
+            font-size: 3rem; font-weight: 300; letter-spacing: 4px; margin-bottom: 50px;
+            text-align: center; color: #fff;
+            text-shadow: 0 0 30px rgba(154, 200, 226, 0.5);
+            position: relative; padding-bottom: 25px;
+        }
+        .page-title::after {
+            content: ''; position: absolute; bottom: 0; left: 25%; width: 50%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-main), transparent);
+        }
+
+        /* ====== 全新趣味性正文排版 ====== */
+        .games-timeline {
+            display: flex; flex-direction: column; gap: 35px;
+        }
+
+        /* 游戏条目卡片 */
+        .game-card {
+            background: rgba(20, 25, 35, 0.4);
+            border-left: 4px solid var(--accent-main);
+            border-radius: 0 16px 16px 0;
+            padding: 25px 30px;
+            position: relative;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .game-card:hover {
+            transform: translateX(8px);
+            background: rgba(25, 35, 50, 0.5);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(154, 200, 226, 0.1);
+        }
+
+        /* 游戏类别标签 - 去除方括号，全新设计 */
+        .game-category {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.85rem; font-weight: 700; letter-spacing: 1.2px;
+            color: var(--accent-light); 
+            background: linear-gradient(135deg, rgba(154, 200, 226, 0.15), rgba(122, 176, 209, 0.1));
+            padding: 8px 18px; border-radius: 30px; margin-bottom: 20px;
+            border: 1px solid rgba(154, 200, 226, 0.25);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            text-transform: uppercase;
+        }
+        /* 为部分类别添加小图标提示 */
+        .game-category::before {
+            content: '▶'; font-size: 0.7rem; opacity: 0.7;
+        }
+
+        /* 游戏描述段落 */
+        .game-desc {
+            font-size: 1.08rem; line-height: 1.9; color: #e8f4fc; font-weight: 350;
+            margin-bottom: 0; text-align: justify;
+        }
+
+        /* 关键点强调样式 - 游戏名 (更活泼) */
+        .game-name {
+            color: #fff; font-weight: 600;
+            padding: 2px 6px; border-radius: 4px;
+            background: rgba(154, 200, 226, 0.15);
+            border-bottom: 2px solid var(--accent-main);
+            margin: 0 2px;
+            transition: all 0.3s;
+        }
+        .game-name:hover { background: rgba(154, 200, 226, 0.25); }
+
+        /* 关键点强调样式 - 时长/等级 (徽章式) */
+        .game-metric {
+            color: var(--accent-light); font-weight: 700;
+            background: rgba(10, 20, 30, 0.7);
+            padding: 4px 10px; border-radius: 20px; margin: 0 6px;
+            border: 1px solid rgba(154, 200, 226, 0.3);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+        }
+
+        /* 关键点强调样式 - 服务器/特殊名称 (高亮) */
+        .game-highlight {
+            color: var(--accent-dark); font-weight: 600;
+            padding: 1px 4px; border-radius: 3px;
+            background: rgba(122, 176, 209, 0.1);
+            border-bottom: 1px dotted var(--accent-dark);
+            font-style: normal;
+        }
+
+        /* 首行简介特殊样式 */
+        .intro-card {
+            border-left-color: var(--accent-light);
+            background: rgba(30, 40, 60, 0.4);
+        }
+        .intro-card .game-desc {
+            font-size: 1.1rem; color: #f0f8ff;
+        }
+        .intro-card .game-name {
+            background: rgba(204, 229, 244, 0.2);
+            border-bottom-color: var(--accent-light);
+        }
+
+        .copyright-footer {
+            position: fixed; bottom: 20px; left: 0; width: 100%; text-align: center;
+            font-size: 0.8rem; color: rgba(255,255,255,0.3); letter-spacing: 1px; z-index: 50;
+        }
+
+        @media (max-width: 768px) {
+            body, html { cursor: auto; } #cursor-dot, #cursor-ring { display: none; }
+            .bg-switcher { top: auto; bottom: 50px; right: 20px; }
+            .top-nav { top: 20px; left: 20px; }
+            .back-btn { font-size: 1rem; padding: 6px 12px; }
+            .card-wrapper { width: 92vw; height: 80vh; margin-top: 10vh; }
+            .content-container { padding: 30px 20px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+            .page-title { font-size: 2.2rem; margin-bottom: 30px; }
+            .game-card { padding: 20px; }
+            .game-desc { font-size: 1rem; line-height: 1.8; }
+            .game-category { font-size: 0.8rem; padding: 6px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page-transition-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- 背景切换面板 -->
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <!-- 返回主页按钮 -->
+    <div class="top-nav">
+        <a href="../" class="back-btn page-link interactable">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            返回主页
+        </a>
+    </div>
+
+    <!-- 3D 悬浮卡片与重构后的正文 -->
+    <div class="card-wrapper" id="parallaxCard">
+        <div class="content-container">
+            <h1 class="page-title">游戏经历</h1>
+            
+            <div class="games-timeline">
+                <!-- 简介 -->
+                <div class="game-card intro-card">
+                    <div class="game-desc">
+                        <span class="game-name">Steam</span> 8年用户，<span class="game-name">Epic Games</span> 4年用户，低氪/零氪玩家为主。
+                    </div>
+                </div>
+
+                <!-- 沙盒探索类 -->
+                <div class="game-card">
+                    <div class="game-category">沙盒探索类</div>
+                    <div class="game-desc">
+                        <span class="game-name">Minecraft</span> <span class="game-metric">2000h</span>玩家，自<span class="game-metric">2015年</span>开始游玩至今，涵盖Pocket Edition、Bedrock Edition、Java Edition。网易中国版双端内测玩家，主要体验大型多人在线服务器，包含深度体验<span class="game-highlight">Hypixel（含中国服务器）</span>、<span class="game-highlight">梦世界</span>、<span class="game-highlight">花雨庭</span>等著名小游戏集合服务器以及<span class="game-highlight">梦之边缘V（神魔战域/神秘海岛，特色RPG服务器）</span>重度游玩经历。
+                    </div>
+                </div>
+
+                <!-- 换装搭配类 -->
+                <div class="game-card">
+                    <div class="game-category">换装搭配类</div>
+                    <div class="game-desc">
+                        <span class="game-name">无限暖暖</span> <span class="game-metric">600+h（Steam口径750+h）</span>，<span class="game-metric">98级</span>
+                    </div>
+                </div>
+
+                <!-- 动作类 -->
+                <div class="game-card">
+                    <div class="game-category">动作类</div>
+                    <div class="game-desc">
+                        <span class="game-name">绝区零</span> 活跃天数 <span class="game-metric">600+天 / 400+h</span>，<span class="game-highlight">传奇绳匠</span>
+                    </div>
+                </div>
+
+                <!-- 赛车竞速类 -->
+                <div class="game-card">
+                    <div class="game-category">赛车竞速类</div>
+                    <div class="game-desc">
+                        <span class="game-name">极限竞速：地平线4</span> <span class="game-metric">120+h</span> / <span class="game-name">飙酷车神2</span> / <span class="game-name">飙酷车神：轰鸣盛典</span> / <span class="game-name">QQ飞车手游</span> / <span class="game-name">极品飞车手游</span> / <span class="game-name">狂野飙车9</span> / <span class="game-name">天天飞车</span>
+                    </div>
+                </div>
+
+                <!-- 模拟经营类 -->
+                <div class="game-card">
+                    <div class="game-category">模拟经营类</div>
+                    <div class="game-desc">
+                        <span class="game-name">Cities Skylines</span> <span class="game-metric">265+h</span> / <span class="game-name">Simcity: BuildIt</span> <span class="game-metric">200+h</span> / <span class="game-name">F1车队经理24</span> / <span class="game-name">过山车之星</span> / <span class="game-name">星露谷物语</span> / <span class="game-name">双点系列</span>
+                    </div>
+                </div>
+
+                <!-- 派对游戏类 -->
+                <div class="game-card">
+                    <div class="game-category">派对游戏类</div>
+                    <div class="game-desc">
+                        <span class="game-name">糖豆人</span> <span class="game-metric">75+h</span> / <span class="game-name">蛋仔派对</span> / <span class="game-name">元梦之星</span> <span class="game-highlight">原教旨淘汰赛玩家</span>
+                    </div>
+                </div>
+
+                <!-- 音乐舞蹈类 -->
+                <div class="game-card">
+                    <div class="game-category">音乐舞蹈类</div>
+                    <div class="game-desc">
+                        <span class="game-name">BanG Dream! 少女乐团派对</span> <span class="game-metric">600+h</span> / <span class="game-name">节奏大师</span> / <span class="game-name">Cytus II</span> / <span class="game-name">跳舞的线</span> / <span class="game-name">Muse Dash</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统一版权 -->
+    <div class="copyright-footer">
+        ©Eric Chiu，网页使用AI辅助生成
+    </div>
+
+    <script>
+        /* 修复1：背景系统 - 完全按照【本次提供的】index.html的继承逻辑 */
+        const bgs = [
+            'https://s1.1ovv.com/2026/03/21/Ix6I.png',
+            'https://s1.1ovv.com/2026/03/21/IxkP.png',
+            'https://s1.1ovv.com/2026/03/21/I5rf.png',
+            'https://s1.1ovv.com/2026/03/21/I5Wi.png'
+        ];
+        const mainBg = document.getElementById('mainBg');
+        const swBtns = document.querySelectorAll('.sw-btn');
+
+        // 关键修改：使用 sessionStorage 而非 localStorage，与主页逻辑保持一致
+        let savedIndex = sessionStorage.getItem('bg-index');
+        if (savedIndex === null) {
+            savedIndex = Math.floor(Math.random() * bgs.length);
+            sessionStorage.setItem('bg-index', savedIndex);
+        } else {
+            savedIndex = parseInt(savedIndex);
+        }
+
+        function applyBg(index) {
+            mainBg.style.backgroundImage = `url('${bgs[index]}')`;
+            sessionStorage.setItem('bg-index', index);
+            swBtns.forEach((btn, i) => {
+                btn.classList.toggle('active', i == index);
+            });
+        }
+        function changeBg(index) { applyBg(index); }
+        // 应用初始背景
+        applyBg(savedIndex);
+
+        /* 注意：sessionStorage 是标签页级别的存储。
+         * 这意味着如果用户在新标签页打开此页面，将无法继承主页的背景选择。
+         * 如果您需要跨标签页同步，需将主页的背景逻辑也改为 localStorage，
+         * 或采用其他方案（如URL参数）。当前按您要求，完全遵循现有逻辑。
+         */
+
+        /* 2. 3D 卡片透视偏转 */
+        const card = document.getElementById('parallaxCard');
+        let cardTargetRotX = 0, cardTargetRotY = 0, cardTargetY = 0;
+        let cardCurrRotX = 0, cardCurrRotY = 0, cardCurrY = 0;
+        let mouseRatioX = 0, mouseRatioY = 0;
+
+        window.addEventListener('mousemove', e => {
+            mouseRatioX = (e.clientX / window.innerWidth - 0.5) * 2;
+            mouseRatioY = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            cardTargetRotY = mouseRatioX * 4;
+            cardTargetRotX = -mouseRatioY * 4;
+            cardTargetY = mouseRatioY * -15;
+        });
+
+        function render3DCard() {
+            cardCurrRotX += (cardTargetRotX - cardCurrRotX) * 0.1;
+            cardCurrRotY += (cardTargetRotY - cardCurrRotY) * 0.1;
+            cardCurrY += (cardTargetY - cardCurrY) * 0.1;
+            card.style.transform = `translateY(${cardCurrY}px) rotateX(${cardCurrRotX}deg) rotateY(${cardCurrRotY}deg)`;
+            requestAnimationFrame(render3DCard);
+        }
+        setTimeout(() => requestAnimationFrame(render3DCard), 1000);
+
+        /* 修复2：鼠标光标逻辑 - 完全参照【本次提供的】index.html重写，确保灵敏度 */
+        const cursorDot = document.getElementById('cursor-dot'), cursorRing = document.getElementById('cursor-ring');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let ringX = mouseX, ringY = mouseY;
+        let isCursorActive = false;
+
+        // 关键修改：移除可能影响性能的CSS transition后，JS需直接控制opacity
+        window.addEventListener('mousemove', e => {
+            if(!isCursorActive) {
+                cursorDot.style.opacity = '1';
+                cursorRing.style.opacity = '1';
+                document.body.style.cursor = 'none';
+                isCursorActive = true;
+            }
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            // 光标圆点立即跟随
+            cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+        });
+
+        // 关键修改：参照原文件，使用相同的缓动因子 (0.2) 确保灵敏度一致
+        function renderCursor() {
+            if (isCursorActive) {
+                ringX += (mouseX - ringX) * 0.2; // 与提供的index.html完全一致
+                ringY += (mouseY - ringY) * 0.2;
+                cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+            }
+            requestAnimationFrame(renderCursor);
+        }
+        renderCursor();
+
+        // 触摸设备隐藏光标
+        window.addEventListener('touchstart', () => {
+            isCursorActive = false;
+            cursorDot.style.opacity = '0';
+            cursorRing.style.opacity = '0';
+            document.body.style.cursor = 'auto';
+        });
+
+        /* 交互元素的光标反馈 */
+        document.querySelectorAll('.interactable').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorDot.classList.add('hovered');
+                cursorRing.classList.add('hovered');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorDot.classList.remove('hovered');
+                cursorRing.classList.remove('hovered');
+            });
+        });
+
+        /* 3. 页面过渡 */
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.body.classList.add('fade-out'); 
+                setTimeout(() => window.location.href = link.getAttribute('href'), 800); 
+            });
+        });
+
+        /* 4. 黑洞引力粒子系统 (保持不变) */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [], activeMouse = { x: null, y: null };
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+
+        window.addEventListener('mousemove', e => { activeMouse.x = e.clientX; activeMouse.y = e.clientY; });
+        window.addEventListener('mouseout', () => { activeMouse.x = null; activeMouse.y = null; });
+        window.addEventListener('click', e => {
+            if (e.target.closest('.interactable') || e.target.closest('.content-container')) return; 
+            let shockX = e.clientX, shockY = e.clientY;
+            particlesArray.forEach(p => {
+                let dx = p.x - shockX, dy = p.y - shockY, distance = Math.hypot(dx, dy) || 1;
+                let force = Math.min(1200 / distance, 60); 
+                p.vx += (dx / distance) * force; p.vy += (dy / distance) * force; p.baseAlpha = 1; 
+            });
+        });
+
+        class Particle {
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 1.5 + 0.5; this.baseAlpha = Math.random() * 0.6 + 0.2; this.vx = (Math.random() - 0.5) * 1; this.vy = (Math.random() - 0.5) * 1; this.friction = 0.94; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(154, 200, 226, ${this.baseAlpha})`; ctx.fill(); }
+            update() {
+                let speed = Math.hypot(this.vx, this.vy);
+                if (speed < 3 && activeMouse.x != null && activeMouse.y != null) {
+                    let dx = activeMouse.x - this.x, dy = activeMouse.y - this.y, distance = Math.hypot(dx, dy);
+                    if (distance < 350) {
+                        let force = (350 - distance) / 350;
+                        if (distance > 40) { this.vx += (dx / distance) * force * 0.5; this.vy += (dy / distance) * force * 0.5; } 
+                        else { this.vx -= (dx / distance) * force * 0.8; this.vy -= (dy / distance) * force * 0.8; }
+                        this.vx += (-dy / distance) * force * 0.35; this.vy += (dx / distance) * force * 0.35;
+                        this.baseAlpha = Math.min(this.baseAlpha + 0.05, 1);
+                    } else { this.baseAlpha = Math.max(this.baseAlpha - 0.01, 0.2); }
+                } else { this.baseAlpha = Math.max(this.baseAlpha - 0.01, 0.2); }
+
+                if(speed > 30) { this.vx = (this.vx / speed) * 30; this.vy = (this.vy / speed) * 30; }
+                this.vx *= this.friction; this.vy *= this.friction;
+                if (Math.abs(this.vx) < 0.1) this.vx += (Math.random() - 0.5) * 0.2; if (Math.abs(this.vy) < 0.1) this.vy += (Math.random() - 0.5) * 0.2;
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0) this.x = canvas.width; else if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height; else if (this.y > canvas.height) this.y = 0;
+                this.draw();
+            }
+        }
+        for (let i = 0; i < Math.min(Math.floor((canvas.width * canvas.height) / 6000), 350); i++) particlesArray.push(new Particle());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particlesArray.forEach(p => p.update()); requestAnimationFrame(animate); }
+        animate();
+    </script>
+</body>
+</html>
