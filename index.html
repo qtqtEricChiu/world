@@ -9,18 +9,28 @@
     <link rel="prefetch" href="timeline/">
     <link rel="prefetch" href="https://qtqtericchiu.github.io/blog/">
 
-    <!-- 页面背景预锁定脚本：防止跳转瞬间闪黑 -->
+    <!-- [现代过渡] 开启 Chrome MPA 跨文档视图转换 -->
+    <style>
+        @view-transition { navigation: auto; }
+        /* 定制视图转换动画：纯粹的交叉淡入淡出 */
+        ::view-transition-old(root) { animation: fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        ::view-transition-new(root) { animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1); mix-blend-mode: normal; }
+        @keyframes fade-out { to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } }
+    </style>
+
+    <!-- [极致防闪烁] 动态写入首屏同步样式，确保背景与遮罩层严格按层级渲染 -->
     <script>
         (function() {
             const bgs = ['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
-            const savedIndex = sessionStorage.getItem('bg-index');
-            if (savedIndex !== null) {
-                document.documentElement.style.backgroundImage = `url('${bgs[parseInt(savedIndex)]}')`;
-                document.documentElement.style.backgroundSize = 'cover';
-                document.documentElement.style.backgroundPosition = 'center';
-            }
+            let savedIndex = sessionStorage.getItem('bg-index');
+            if (savedIndex === null) { savedIndex = Math.floor(Math.random() * bgs.length); sessionStorage.setItem('bg-index', savedIndex); }
+            document.write(`<style>#mainBg { background-image: url('${bgs[savedIndex]}'); }</style>`);
         })();
     </script>
+
+    <!-- 引入 Pangu.js (使用 jsDelivr CDN 避免 GitHub Raw MIME 类型拦截) -->
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
 
     <style>
         :root { --accent-main: #9ac8e2; --accent-light: #cce5f4; --glass-bg: rgba(154, 200, 226, 0.03); --glass-border: rgba(154, 200, 226, 0.15); }
@@ -28,13 +38,9 @@
         html { background-color: #000; }
         body, html { width: 100%; height: 100%; overflow: hidden; font-family: "OPPO Sans 4.0", "OPPO Sans", sans-serif; color: #fff; cursor: none; }
 
-        /* [修复] 优化转场动画：废除 body 隐藏，改为纯黑图层覆盖，避免原图闪烁 */
-        #page-transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        /* 仅用于浏览器首次冷启动进入网站时的黑屏渐明，内部跳转由 View Transitions 接管 */
+        #initial-load-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes removeBlackScreen { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-        /* 退场时的覆盖动画类 */
-        #page-transition-overlay.fade-in { animation: none; opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        @view-transition { navigation: auto; }
 
         #cursor-dot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%; margin: -3px 0 0 -3px; pointer-events: none; z-index: 99998; will-change: transform; opacity: 0; }
         #cursor-ring { position: fixed; top: 0; left: 0; width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%; margin: -18px 0 0 -18px; pointer-events: none; z-index: 99997; will-change: transform; opacity: 0; }
@@ -44,7 +50,7 @@
         .bg-wrapper { position: absolute; top: -2%; left: -2%; width: 104%; height: 104%; z-index: -2; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; }
         .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(5, 5, 5, 0.5); }
 
-        .bg-switcher { position: fixed; top: 30px; right: 40px; z-index: 100; display: flex; gap: 10px; padding: 8px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 12px; opacity: 0; animation: floatIn 0.8s 0.5s forwards; }
+        .bg-switcher { position: fixed; top: 30px; right: 40px; z-index: 100; display: flex; gap: 10px; padding: 8px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 12px; opacity: 0; animation: floatIn 0.8s 0.5s forwards; }
         .sw-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); cursor: none; background-size: cover; background-position: center; transition: transform 0.3s, border-color 0.3s; }
         .sw-btn:hover { transform: scale(1.1); border-color: var(--accent-main); }
         .sw-btn.active { border-color: var(--accent-main); box-shadow: 0 0 10px var(--accent-main); }
@@ -54,6 +60,7 @@
         .entry-points.blurred { filter: blur(8px); opacity: 0; pointer-events: none !important; }
 
         @keyframes floatIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        /* 废除 translate3d，纯粹使用 translate 避免未来被加速破坏滤镜 */
         .node { position: absolute; padding: 15px 30px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--accent-light); text-decoration: none; font-weight: 300; letter-spacing: 2px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none; opacity: 0; animation: floatIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; transition: box-shadow 0.4s, border-color 0.4s, color 0.4s; will-change: transform; }
         .node::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 30px; box-shadow: inset 0 0 20px rgba(154, 200, 226, 0); transition: all 0.4s ease; pointer-events: none; }
         .node:hover { color: #fff; border-color: var(--accent-main); box-shadow: 0 0 25px rgba(154, 200, 226, 0.25); text-shadow: 0 0 10px var(--accent-main); }
@@ -61,7 +68,7 @@
 
         .node:nth-child(1) { top: 20%; left: 20%; animation-delay: 0.1s; } .node:nth-child(2) { top: 75%; left: 15%; animation-delay: 0.3s; } .node:nth-child(3) { top: 50%; left: 50%; font-size: 1.2rem; padding: 20px 40px; animation-delay: 0s; } .node:nth-child(4) { top: 25%; left: 80%; animation-delay: 0.2s; } .node:nth-child(5) { top: 80%; left: 85%; animation-delay: 0.4s; }
 
-        .about-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); width: 75vw; height: 75vh; max-width: 1000px; max-height: 700px; background: rgba(10, 15, 20, 0.6); border: 1px solid var(--glass-border); border-radius: 24px; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05); z-index: 30; opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .about-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); width: 75vw; height: 75vh; max-width: 1000px; max-height: 700px; background: rgba(10, 15, 20, 0.6); border: 1px solid var(--glass-border); border-radius: 24px; backdrop-filter: blur(25px); box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05); z-index: 30; opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
         .about-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
         #blogModal { height: auto; max-height: 60vh; max-width: 650px; padding: 40px 30px; }
         .close-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--accent-light); font-size: 24px; transition: color 0.3s, transform 0.3s; padding: 10px; border-radius: 50%; cursor: none; }
@@ -71,10 +78,10 @@
         .bio { font-size: 1rem; color: var(--accent-light); line-height: 1.8; max-width: 80%; font-weight: 300; text-align: justify;}
 
         .bottom-dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 40; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .toggle-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 50px; padding: 10px 30px; color: var(--accent-main); font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: none; text-decoration: none; font-family: inherit; }
+        .toggle-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(15px); border-radius: 50px; padding: 10px 30px; color: var(--accent-main); font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: none; text-decoration: none; }
         .toggle-btn:hover { background: rgba(154, 200, 226, 0.15); box-shadow: 0 0 15px rgba(154, 200, 226, 0.4); }
         .toggle-btn svg { transition: transform 0.3s ease; }
-        .dock-panel { background: rgba(10, 10, 10, 0.6); border: 1px solid var(--glass-border); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 20px; padding: 15px 20px; display: flex; gap: 15px; opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 40px rgba(0,0,0,0.8); max-width: 90vw; overflow-x: auto; scrollbar-width: none; }
+        .dock-panel { background: rgba(10, 10, 10, 0.6); border: 1px solid var(--glass-border); backdrop-filter: blur(25px); border-radius: 20px; padding: 15px 20px; display: flex; gap: 15px; opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 40px rgba(0,0,0,0.8); max-width: 90vw; overflow-x: auto; scrollbar-width: none; }
         .dock-panel::-webkit-scrollbar { display: none; }
         .dock-panel.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
         .dock-icon { display: block; width: 45px; height: 45px; border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; flex-shrink: 0; cursor: none;}
@@ -89,14 +96,13 @@
             .node:nth-child(1) { top: 15%; left: 25%; } .node:nth-child(2) { top: 35%; left: 75%; }
             .node:nth-child(3) { top: 50%; left: 50%; } .node:nth-child(4) { top: 65%; left: 25%; }
             .node:nth-child(5) { top: 85%; left: 75%; }
-            .about-modal { width: 90vw; height: 60vh; padding: 20px; }
-            #blogModal { padding: 30px 20px; }
+            .about-modal { width: 90vw; height: 60vh; padding: 20px; } #blogModal { padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="page-transition-overlay"></div>
+    <div id="initial-load-overlay"></div>
     <div id="cursor-dot"></div>
     <div id="cursor-ring"></div>
 
@@ -134,7 +140,7 @@
         <p class="bio">因为本地系统重装导致无法重新构建，个人博客已于2023年前后停止更新。里面的内容可能并非最新，且不保证有效。3年前的博客内容亦不代表本人当前的观点和立场。<br><br>博客基于 Hexo 及 Nexmoe 框架构建，并基于个人知识对部分源代码进行了改动。</p>
         <div style="margin-top: 35px; display: flex; gap: 20px; width: 100%; justify-content: center;">
             <button class="toggle-btn interactable" id="cancelBlogBtn" style="color: #fff; border-color: rgba(255,255,255,0.2);">取消前往</button>
-            <button class="toggle-btn interactable" id="continueBlogBtn" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">继续前往</button>
+            <a href="https://qtqtericchiu.github.io/blog/" class="toggle-btn page-link interactable" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">继续前往</a>
         </div>
     </div>
 
@@ -150,29 +156,22 @@
     </div>
 
     <script>
+        // Pangu.js 自动盘古之白排版
+        document.addEventListener('DOMContentLoaded', () => { if (typeof pangu !== 'undefined') pangu.spacingPage(); });
+
         const bgs = ['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
-        const mainBg = document.getElementById('mainBg');
         const swBtns = document.querySelectorAll('.sw-btn');
-
-        let savedIndex = sessionStorage.getItem('bg-index');
-        if (savedIndex === null) { savedIndex = Math.floor(Math.random() * bgs.length); sessionStorage.setItem('bg-index', savedIndex); }
-
-        function applyBg(index) { mainBg.style.backgroundImage = `url('${bgs[index]}')`; sessionStorage.setItem('bg-index', index); swBtns.forEach((btn, i) => btn.classList.toggle('active', i == index)); }
+        let savedIndex = sessionStorage.getItem('bg-index') || 0;
+        function applyBg(index) { document.getElementById('mainBg').style.backgroundImage = `url('${bgs[index]}')`; sessionStorage.setItem('bg-index', index); swBtns.forEach((btn, i) => btn.classList.toggle('active', i == index)); }
         function changeBg(index) { applyBg(index); }
         applyBg(savedIndex);
 
-        // [修复] 唤出覆盖层代替淡出内容，彻底遮罩原始背景图
-        function triggerTransition(url) {
-            sessionStorage.setItem('cursor-x', mouseX);
-            sessionStorage.setItem('cursor-y', mouseY);
-            document.getElementById('page-transition-overlay').classList.add('fade-in');
-            setTimeout(() => window.location.href = url, 450); 
-        }
-
+        // [现代过渡] 仅记录鼠标位置给下一页渲染光标，不干涉原生默认的A标签跳转。
+        // 由于 CSS 中设置了 @view-transition，Chrome 会自动执行截图和交叉淡入淡出！
         document.querySelectorAll('.page-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                triggerTransition(link.getAttribute('href'));
+            link.addEventListener('click', () => {
+                sessionStorage.setItem('cursor-x', mouseX);
+                sessionStorage.setItem('cursor-y', mouseY);
             });
         });
 
@@ -184,7 +183,7 @@
             nodeData.forEach(nd => {
                 nd.targetX = -mouseRatioX * nd.depth; nd.targetY = -mouseRatioY * nd.depth; nd.targetScale = nd.el.matches(':hover') ? 1.05 : 1;
                 nd.currX += (nd.targetX - nd.currX) * 0.15; nd.currY += (nd.targetY - nd.currY) * 0.15; nd.currScale += (nd.targetScale - nd.currScale) * 0.2;
-                nd.el.style.transform = `translate3d(calc(-50% + ${nd.currX}px), calc(-50% + ${nd.currY}px), 0) scale(${nd.currScale})`;
+                nd.el.style.transform = `translate(calc(-50% + ${nd.currX}px), calc(-50% + ${nd.currY}px)) scale(${nd.currScale})`;
             });
             requestAnimationFrame(renderNodes);
         }
@@ -194,15 +193,15 @@
         let mouseX = parseFloat(sessionStorage.getItem('cursor-x')) || window.innerWidth / 2, mouseY = parseFloat(sessionStorage.getItem('cursor-y')) || window.innerHeight / 2;
         let ringX = mouseX, ringY = mouseY, isCursorActive = false;
 
-        function updateCursorPos(e) { if(!isCursorActive) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCursorActive = true; } mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`; }
+        function updateCursorPos(e) { if(!isCursorActive) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCursorActive = true; } mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`; }
         window.addEventListener('mousemove', updateCursorPos);
         window.addEventListener('touchstart', () => { isCursorActive = false; cursorDot.style.opacity = '0'; cursorRing.style.opacity = '0'; document.body.style.cursor = 'auto'; });
         function renderCursor() { 
             if (isCursorActive || sessionStorage.getItem('cursor-x')) { 
                 if(!isCursorActive) { cursorDot.style.opacity='1'; cursorRing.style.opacity='1'; isCursorActive=true; }
                 ringX += (mouseX - ringX) * 0.2; ringY += (mouseY - ringY) * 0.2; 
-                cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`; 
-                cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+                cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`; 
+                cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
             } requestAnimationFrame(renderCursor); 
         }
         renderCursor();
@@ -219,9 +218,6 @@
         document.getElementById('btn-blog').addEventListener('click', () => { blogModal.classList.add('active'); entryPoints.classList.add('blurred'); });
         document.getElementById('cancelBlogBtn').addEventListener('click', () => { blogModal.classList.remove('active'); entryPoints.classList.remove('blurred'); });
         
-        // [修复] 确保点击继续前往也能正确调用遮罩层转场
-        document.getElementById('continueBlogBtn').addEventListener('click', () => { triggerTransition('https://qtqtericchiu.github.io/blog/'); });
-
         const canvas = document.getElementById('particle-canvas'); const ctx = canvas.getContext('2d'); let particlesArray =[], activeMouse = { x: null, y: null };
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
         window.addEventListener('mousemove', e => { activeMouse.x = e.clientX; activeMouse.y = e.clientY; });
