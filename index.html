@@ -9,7 +9,7 @@
     <link rel="prefetch" href="timeline/">
     <link rel="prefetch" href="https://qtqtericchiu.github.io/blog/">
 
-    <!-- [优化] 页面背景预锁定脚本：防止跳转瞬间闪黑 -->
+    <!-- 页面背景预锁定脚本：防止跳转瞬间闪黑 -->
     <script>
         (function() {
             const bgs = ['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
@@ -28,25 +28,22 @@
         html { background-color: #000; }
         body, html { width: 100%; height: 100%; overflow: hidden; font-family: "OPPO Sans 4.0", "OPPO Sans", sans-serif; color: #fff; cursor: none; }
 
-        /* [优化] 渐入渐出动画：使用硬件加速和更快的曲线 */
+        /* [修复] 优化转场动画：废除 body 隐藏，改为纯黑图层覆盖，避免原图闪烁 */
         #page-transition-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes removeBlackScreen { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-        body.fade-out { opacity: 0; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* 退场时的覆盖动画类 */
+        #page-transition-overlay.fade-in { animation: none; opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* 原生过渡 API 支持 */
         @view-transition { navigation: auto; }
 
-        /* 定制光标 */
         #cursor-dot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%; margin: -3px 0 0 -3px; pointer-events: none; z-index: 99998; will-change: transform; opacity: 0; }
         #cursor-ring { position: fixed; top: 0; left: 0; width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%; margin: -18px 0 0 -18px; pointer-events: none; z-index: 99997; will-change: transform; opacity: 0; }
         #cursor-dot.hovered { width: 10px; height: 10px; margin: -5px 0 0 -5px; box-shadow: 0 0 15px var(--accent-main); background: #fff; }
         #cursor-ring.hovered { width: 55px; height: 55px; margin: -27.5px 0 0 -27.5px; background-color: rgba(154, 200, 226, 0.1); border-color: transparent; }
 
-        /* 背景控制 */
         .bg-wrapper { position: absolute; top: -2%; left: -2%; width: 104%; height: 104%; z-index: -2; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; }
         .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(5, 5, 5, 0.5); }
 
-        /* 右上角切换器 */
         .bg-switcher { position: fixed; top: 30px; right: 40px; z-index: 100; display: flex; gap: 10px; padding: 8px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 12px; opacity: 0; animation: floatIn 0.8s 0.5s forwards; }
         .sw-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); cursor: none; background-size: cover; background-position: center; transition: transform 0.3s, border-color 0.3s; }
         .sw-btn:hover { transform: scale(1.1); border-color: var(--accent-main); }
@@ -57,24 +54,12 @@
         .entry-points.blurred { filter: blur(8px); opacity: 0; pointer-events: none !important; }
 
         @keyframes floatIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-        .node {
-            position: absolute; padding: 15px 30px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px;
-            color: var(--accent-light); text-decoration: none; font-weight: 300; letter-spacing: 2px;
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none;
-            opacity: 0; animation: floatIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-            transition: box-shadow 0.4s, border-color 0.4s, color 0.4s;
-            will-change: transform; 
-        }
+        .node { position: absolute; padding: 15px 30px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--accent-light); text-decoration: none; font-weight: 300; letter-spacing: 2px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none; opacity: 0; animation: floatIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; transition: box-shadow 0.4s, border-color 0.4s, color 0.4s; will-change: transform; }
         .node::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 30px; box-shadow: inset 0 0 20px rgba(154, 200, 226, 0); transition: all 0.4s ease; pointer-events: none; }
         .node:hover { color: #fff; border-color: var(--accent-main); box-shadow: 0 0 25px rgba(154, 200, 226, 0.25); text-shadow: 0 0 10px var(--accent-main); }
         .node:hover::before { box-shadow: inset 0 0 20px rgba(154, 200, 226, 0.2); }
 
-        .node:nth-child(1) { top: 20%; left: 20%; animation-delay: 0.1s; }
-        .node:nth-child(2) { top: 75%; left: 15%; animation-delay: 0.3s; }
-        .node:nth-child(3) { top: 50%; left: 50%; font-size: 1.2rem; padding: 20px 40px; animation-delay: 0s; } 
-        .node:nth-child(4) { top: 25%; left: 80%; animation-delay: 0.2s; }
-        .node:nth-child(5) { top: 80%; left: 85%; animation-delay: 0.4s; }
+        .node:nth-child(1) { top: 20%; left: 20%; animation-delay: 0.1s; } .node:nth-child(2) { top: 75%; left: 15%; animation-delay: 0.3s; } .node:nth-child(3) { top: 50%; left: 50%; font-size: 1.2rem; padding: 20px 40px; animation-delay: 0s; } .node:nth-child(4) { top: 25%; left: 80%; animation-delay: 0.2s; } .node:nth-child(5) { top: 80%; left: 85%; animation-delay: 0.4s; }
 
         .about-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); width: 75vw; height: 75vh; max-width: 1000px; max-height: 700px; background: rgba(10, 15, 20, 0.6); border: 1px solid var(--glass-border); border-radius: 24px; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05); z-index: 30; opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
         .about-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
@@ -98,8 +83,7 @@
         .dock-icon:hover img { opacity: 1; }
 
         @media (max-width: 768px) {
-            body, html { cursor: auto; }
-            #cursor-dot, #cursor-ring { display: none; }
+            body, html { cursor: auto; } #cursor-dot, #cursor-ring { display: none; }
             .bg-switcher { top: auto; bottom: 20px; right: 20px; }
             .node { padding: 12px 20px; font-size: 0.9rem; }
             .node:nth-child(1) { top: 15%; left: 25%; } .node:nth-child(2) { top: 35%; left: 75%; }
@@ -171,65 +155,46 @@
         const swBtns = document.querySelectorAll('.sw-btn');
 
         let savedIndex = sessionStorage.getItem('bg-index');
-        if (savedIndex === null) {
-            savedIndex = Math.floor(Math.random() * bgs.length);
-            sessionStorage.setItem('bg-index', savedIndex);
-        }
+        if (savedIndex === null) { savedIndex = Math.floor(Math.random() * bgs.length); sessionStorage.setItem('bg-index', savedIndex); }
 
-        function applyBg(index) {
-            mainBg.style.backgroundImage = `url('${bgs[index]}')`;
-            sessionStorage.setItem('bg-index', index);
-            swBtns.forEach((btn, i) => btn.classList.toggle('active', i == index));
-        }
+        function applyBg(index) { mainBg.style.backgroundImage = `url('${bgs[index]}')`; sessionStorage.setItem('bg-index', index); swBtns.forEach((btn, i) => btn.classList.toggle('active', i == index)); }
         function changeBg(index) { applyBg(index); }
         applyBg(savedIndex);
 
-        // [优化] 跳转逻辑：保存光标位置
+        // [修复] 唤出覆盖层代替淡出内容，彻底遮罩原始背景图
+        function triggerTransition(url) {
+            sessionStorage.setItem('cursor-x', mouseX);
+            sessionStorage.setItem('cursor-y', mouseY);
+            document.getElementById('page-transition-overlay').classList.add('fade-in');
+            setTimeout(() => window.location.href = url, 450); 
+        }
+
         document.querySelectorAll('.page-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                sessionStorage.setItem('cursor-x', mouseX);
-                sessionStorage.setItem('cursor-y', mouseY);
-                document.body.classList.add('fade-out'); 
-                setTimeout(() => window.location.href = link.getAttribute('href'), 500); 
+                triggerTransition(link.getAttribute('href'));
             });
         });
 
         const nodes = document.querySelectorAll('.node');
         let mouseRatioX = 0, mouseRatioY = 0;
-        window.addEventListener('mousemove', e => {
-            mouseRatioX = (e.clientX / window.innerWidth - 0.5) * 2;
-            mouseRatioY = (e.clientY / window.innerHeight - 0.5) * 2;
-        });
-        const nodeData = Array.from(nodes).map((node, i) => ({
-            el: node, depth: 15 + (i % 3) * 10,
-            currX: 0, currY: 0, targetX: 0, targetY: 0, currScale: 1, targetScale: 1
-        }));
+        window.addEventListener('mousemove', e => { mouseRatioX = (e.clientX / window.innerWidth - 0.5) * 2; mouseRatioY = (e.clientY / window.innerHeight - 0.5) * 2; });
+        const nodeData = Array.from(nodes).map((node, i) => ({ el: node, depth: 15 + (i % 3) * 10, currX: 0, currY: 0, targetX: 0, targetY: 0, currScale: 1, targetScale: 1 }));
         function renderNodes() {
             nodeData.forEach(nd => {
-                nd.targetX = -mouseRatioX * nd.depth;
-                nd.targetY = -mouseRatioY * nd.depth;
-                nd.targetScale = nd.el.matches(':hover') ? 1.05 : 1;
-                nd.currX += (nd.targetX - nd.currX) * 0.15;
-                nd.currY += (nd.targetY - nd.currY) * 0.15;
-                nd.currScale += (nd.targetScale - nd.currScale) * 0.2;
+                nd.targetX = -mouseRatioX * nd.depth; nd.targetY = -mouseRatioY * nd.depth; nd.targetScale = nd.el.matches(':hover') ? 1.05 : 1;
+                nd.currX += (nd.targetX - nd.currX) * 0.15; nd.currY += (nd.targetY - nd.currY) * 0.15; nd.currScale += (nd.targetScale - nd.currScale) * 0.2;
                 nd.el.style.transform = `translate3d(calc(-50% + ${nd.currX}px), calc(-50% + ${nd.currY}px), 0) scale(${nd.currScale})`;
             });
             requestAnimationFrame(renderNodes);
         }
         setTimeout(() => requestAnimationFrame(renderNodes), 1000);
 
-        // [优化] 光标初始化逻辑：继承上一个页面的坐标
         const cursorDot = document.getElementById('cursor-dot'), cursorRing = document.getElementById('cursor-ring');
-        let mouseX = parseFloat(sessionStorage.getItem('cursor-x')) || window.innerWidth / 2;
-        let mouseY = parseFloat(sessionStorage.getItem('cursor-y')) || window.innerHeight / 2;
+        let mouseX = parseFloat(sessionStorage.getItem('cursor-x')) || window.innerWidth / 2, mouseY = parseFloat(sessionStorage.getItem('cursor-y')) || window.innerHeight / 2;
         let ringX = mouseX, ringY = mouseY, isCursorActive = false;
 
-        function updateCursorPos(e) {
-            if(!isCursorActive) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCursorActive = true; }
-            mouseX = e.clientX; mouseY = e.clientY;
-            cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-        }
+        function updateCursorPos(e) { if(!isCursorActive) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCursorActive = true; } mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`; }
         window.addEventListener('mousemove', updateCursorPos);
         window.addEventListener('touchstart', () => { isCursorActive = false; cursorDot.style.opacity = '0'; cursorRing.style.opacity = '0'; document.body.style.cursor = 'auto'; });
         function renderCursor() { 
@@ -238,49 +203,29 @@
                 ringX += (mouseX - ringX) * 0.2; ringY += (mouseY - ringY) * 0.2; 
                 cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`; 
                 cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-            } 
-            requestAnimationFrame(renderCursor); 
+            } requestAnimationFrame(renderCursor); 
         }
         renderCursor();
 
-        document.querySelectorAll('.interactable').forEach(el => {
-            el.addEventListener('mouseenter', () => { cursorDot.classList.add('hovered'); cursorRing.classList.add('hovered'); });
-            el.addEventListener('mouseleave', () => { cursorDot.classList.remove('hovered'); cursorRing.classList.remove('hovered'); });
-        });
+        document.querySelectorAll('.interactable').forEach(el => { el.addEventListener('mouseenter', () => { cursorDot.classList.add('hovered'); cursorRing.classList.add('hovered'); }); el.addEventListener('mouseleave', () => { cursorDot.classList.remove('hovered'); cursorRing.classList.remove('hovered'); }); });
 
         const toggleBtn = document.getElementById('toggleBtn'), dockPanel = document.getElementById('dockPanel'), btnSvg = toggleBtn.querySelector('svg');
         const entryPoints = document.getElementById('entryPoints'), aboutModal = document.getElementById('aboutModal'), blogModal = document.getElementById('blogModal');
         let isDockOpen = false;
-        function setDockState(open) {
-            isDockOpen = open;
-            if(isDockOpen) { dockPanel.classList.add('active'); btnSvg.style.transform = 'rotate(-90deg)'; toggleBtn.style.background = 'rgba(154, 200, 226, 0.2)'; } 
-            else { dockPanel.classList.remove('active'); btnSvg.style.transform = 'rotate(0deg)'; toggleBtn.style.background = 'var(--glass-bg)'; }
-        }
+        function setDockState(open) { isDockOpen = open; if(isDockOpen) { dockPanel.classList.add('active'); btnSvg.style.transform = 'rotate(-90deg)'; toggleBtn.style.background = 'rgba(154, 200, 226, 0.2)'; } else { dockPanel.classList.remove('active'); btnSvg.style.transform = 'rotate(0deg)'; toggleBtn.style.background = 'var(--glass-bg)'; } }
         toggleBtn.addEventListener('click', () => setDockState(!isDockOpen));
         document.getElementById('btn-about').addEventListener('click', () => { aboutModal.classList.add('active'); entryPoints.classList.add('blurred'); setDockState(true); });
         document.getElementById('closeAboutBtn').addEventListener('click', () => { aboutModal.classList.remove('active'); entryPoints.classList.remove('blurred'); setDockState(false); });
         document.getElementById('btn-blog').addEventListener('click', () => { blogModal.classList.add('active'); entryPoints.classList.add('blurred'); });
         document.getElementById('cancelBlogBtn').addEventListener('click', () => { blogModal.classList.remove('active'); entryPoints.classList.remove('blurred'); });
-        document.getElementById('continueBlogBtn').addEventListener('click', () => { 
-            sessionStorage.setItem('cursor-x', mouseX); sessionStorage.setItem('cursor-y', mouseY);
-            document.body.classList.add('fade-out'); 
-            setTimeout(() => window.location.href = 'https://qtqtericchiu.github.io/blog/', 500); 
-        });
+        
+        // [修复] 确保点击继续前往也能正确调用遮罩层转场
+        document.getElementById('continueBlogBtn').addEventListener('click', () => { triggerTransition('https://qtqtericchiu.github.io/blog/'); });
 
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particlesArray =[], activeMouse = { x: null, y: null };
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
+        const canvas = document.getElementById('particle-canvas'); const ctx = canvas.getContext('2d'); let particlesArray =[], activeMouse = { x: null, y: null };
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
         window.addEventListener('mousemove', e => { activeMouse.x = e.clientX; activeMouse.y = e.clientY; });
-        window.addEventListener('click', e => {
-            if (e.target.closest('.interactable')) return; 
-            let shockX = e.clientX, shockY = e.clientY;
-            particlesArray.forEach(p => {
-                let dx = p.x - shockX, dy = p.y - shockY, distance = Math.hypot(dx, dy) || 1;
-                let force = Math.min(1200 / distance, 60); p.vx += (dx / distance) * force; p.vy += (dy / distance) * force; p.baseAlpha = 1; 
-            });
-        });
+        window.addEventListener('click', e => { if (e.target.closest('.interactable')) return; let shockX = e.clientX, shockY = e.clientY; particlesArray.forEach(p => { let dx = p.x - shockX, dy = p.y - shockY, distance = Math.hypot(dx, dy) || 1; let force = Math.min(1200 / distance, 60); p.vx += (dx / distance) * force; p.vy += (dy / distance) * force; p.baseAlpha = 1; }); });
         class Particle {
             constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 1.5 + 0.5; this.baseAlpha = Math.random() * 0.6 + 0.2; this.vx = (Math.random() - 0.5) * 1; this.vy = (Math.random() - 0.5) * 1; this.friction = 0.94; }
             draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(154, 200, 226, ${this.baseAlpha})`; ctx.fill(); }
@@ -288,19 +233,11 @@
                 let speed = Math.hypot(this.vx, this.vy);
                 if (speed < 3 && activeMouse.x != null && activeMouse.y != null) {
                     let dx = activeMouse.x - this.x, dy = activeMouse.y - this.y, distance = Math.hypot(dx, dy);
-                    if (distance < 350) {
-                        let force = (350 - distance) / 350;
-                        if (distance > 40) { this.vx += (dx / distance) * force * 0.5; this.vy += (dy / distance) * force * 0.5; } 
-                        else { this.vx -= (dx / distance) * force * 0.8; this.vy -= (dy / distance) * force * 0.8; }
-                        this.vx += (-dy / distance) * force * 0.35; this.vy += (dx / distance) * force * 0.35;
-                        this.baseAlpha = Math.min(this.baseAlpha + 0.05, 1);
+                    if (distance < 350) { let force = (350 - distance) / 350; if (distance > 40) { this.vx += (dx / distance) * force * 0.5; this.vy += (dy / distance) * force * 0.5; } else { this.vx -= (dx / distance) * force * 0.8; this.vy -= (dy / distance) * force * 0.8; } this.vx += (-dy / distance) * force * 0.35; this.vy += (dx / distance) * force * 0.35; this.baseAlpha = Math.min(this.baseAlpha + 0.05, 1);
                     } else { this.baseAlpha = Math.max(this.baseAlpha - 0.01, 0.2); }
                 } else { this.baseAlpha = Math.max(this.baseAlpha - 0.01, 0.2); }
-                if(speed > 30) { this.vx = (this.vx / speed) * 30; this.vy = (this.vy / speed) * 30; }
-                this.vx *= this.friction; this.vy *= this.friction;
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0) this.x = canvas.width; else if (this.x > canvas.width) this.x = 0;
-                if (this.y < 0) this.y = canvas.height; else if (this.y > canvas.height) this.y = 0;
+                if(speed > 30) { this.vx = (this.vx / speed) * 30; this.vy = (this.vy / speed) * 30; } this.vx *= this.friction; this.vy *= this.friction; this.x += this.vx; this.y += this.vy;
+                if (this.x < 0) this.x = canvas.width; else if (this.x > canvas.width) this.x = 0; if (this.y < 0) this.y = canvas.height; else if (this.y > canvas.height) this.y = 0;
                 this.draw();
             }
         }
