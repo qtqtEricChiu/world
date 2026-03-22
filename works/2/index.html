@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>作品展示 - mocabolka.world</title>
+    
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+    <link rel="prefetch" href="../">
+
+    <style>
+        @view-transition { navigation: auto; }
+        ::view-transition-old(root) { animation: fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        ::view-transition-new(root) { animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1); mix-blend-mode: normal; }
+        @keyframes fade-out { to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } }
+    </style>
+
+    <script>
+        (function() {
+            const bgs =['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
+            const savedIndex = sessionStorage.getItem('bg-index') || 0;
+            document.write(`<style>#mainBg{background-image:url('${bgs[savedIndex]}')}</style>`);
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        :root { --accent-main: #9ac8e2; --accent-light: #cce5f4; --accent-dark: #7ab0d1; --glass-bg: rgba(10, 15, 20, 0.55); --glass-border: rgba(154, 200, 226, 0.2); --next-btn-color: #4CAF50; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { background-color: #000; }
+        body, html { width: 100%; height: 100%; overflow: hidden; font-family: "OPPO Sans 4.0", "OPPO Sans", sans-serif; color: #fff; cursor: none; }
+
+        #initial-load-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes removeBlackScreen { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+
+        #cursor-dot, #cursor-ring { position: fixed; top: 0; left: 0; pointer-events: none; will-change: transform; opacity: 0; }
+        #cursor-dot { width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%; margin: -3px 0 0 -3px; z-index: 99998; }
+        #cursor-ring { width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%; margin: -18px 0 0 -18px; z-index: 99997; }
+        #cursor-dot.hovered { width: 10px; height: 10px; margin: -5px 0 0 -5px; box-shadow: 0 0 15px var(--accent-main); background: #fff; }
+        #cursor-ring.hovered { width: 55px; height: 55px; margin: -27.5px 0 0 -27.5px; background-color: rgba(154, 200, 226, 0.1); border-color: transparent; }
+
+        .bg-wrapper { position: absolute; top: -2%; left: -2%; width: 104%; height: 104%; z-index: -2; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; }
+        .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(5, 5, 5, 0.75); }
+        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        .bg-switcher { position: fixed; top: 30px; right: 40px; z-index: 100; display: flex; gap: 10px; padding: 8px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 12px; }
+        .sw-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); cursor: none; background-size: cover; background-position: center; transition: transform 0.3s, border-color 0.3s; }
+        .sw-btn:hover { transform: scale(1.1); border-color: var(--accent-main); }
+        .sw-btn.active { border-color: var(--accent-main); box-shadow: 0 0 10px var(--accent-main); }
+
+        .top-nav { position: fixed; top: 30px; left: 40px; z-index: 100; display: flex; align-items: center; }
+        .back-btn { display: flex; align-items: center; gap: 10px; color: var(--accent-light); text-decoration: none; font-size: 1.1rem; letter-spacing: 2px; padding: 8px 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(154, 200, 226, 0.1); transition: all 0.3s ease; }
+        .back-btn:hover { color: #fff; transform: translateX(-5px); border-color: var(--accent-main); background: rgba(154, 200, 226, 0.1); }
+
+        .blur-target { transition: filter 0.4s ease, opacity 0.4s ease; }
+        .blur-target.blurred { filter: blur(10px); opacity: 0.4; pointer-events: none !important; }
+
+        .main-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 0; perspective: 1500px; }
+        
+        /* 独立脱离文档流的双悬浮遮罩 - 给中间图片预留最大空间 */
+        .text-overlay-top { position: absolute; top: 0; left: 0; width: 100%; height: 30%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; z-index: 20; padding: 70px 20px 0 20px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0) 100%); pointer-events: none; }
+        .text-overlay-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 35%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; z-index: 20; padding: 0 20px 135px 20px; background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0) 100%); pointer-events: none; }
+
+        .work-title { font-size: 1.875rem; font-weight: 300; letter-spacing: 3px; margin-bottom: 15px; color: #fff; text-shadow: 0 0 20px rgba(154, 200, 226, 0.5); line-height: 1.2; }
+        .work-desc { font-size: 0.825rem; line-height: 1.6; color: var(--accent-light); font-weight: 350; max-width: 800px; margin: 0 auto; opacity: 0.9; }
+
+        /* 3D 网格图片引擎 */
+        .image-grid { display: flex; width: 100%; height: 68vh; gap: 40px; align-items: center; justify-content: center; z-index: 1; transform-style: preserve-3d; }
+        .image-card-wrapper { position: relative; height: 100%; aspect-ratio: 9 / 16; display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; cursor: none; border-radius: 20px; }
+        
+        .image-card { width: 100%; height: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden; position: relative; transform-style: preserve-3d; box-shadow: 0 20px 50px rgba(0,0,0,0.5); pointer-events: none; }
+        .image-card img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; transition: transform 0.4s ease; pointer-events: none; }
+        .image-card-wrapper:hover .image-card img { transform: scale(1.05); }
+        .image-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(154, 200, 226, 0.05); border-radius: 18px; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        .image-card-wrapper:hover .image-card::after { opacity: 1; }
+        
+        .image-label { position: absolute; top: 15px; left: 0; right: 0; text-align: center; color: var(--accent-light); font-size: 0.9rem; letter-spacing: 1px; opacity: 0.8; z-index: 3; padding: 8px 10px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-radius: 10px; margin: 0 15px; transition: all 0.3s ease; pointer-events: none; }
+        .image-card-wrapper:hover .image-label { opacity: 1; background: rgba(0, 0, 0, 0.8); transform: translateY(-5px); }
+
+        .bottom-button-row { position: fixed; bottom: 60px; left: 0; width: 100%; display: flex; gap: 30px; justify-content: center; align-items: center; z-index: 30; padding: 0 20px; pointer-events: none; }
+        .nav-button { padding: 12px 35px; background: rgba(154, 200, 226, 0.15); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--accent-light); text-decoration: none; font-size: 1rem; letter-spacing: 1.5px; transition: all 0.3s ease; backdrop-filter: blur(10px); text-align: center; min-width: 200px; pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none; }
+        .nav-button:hover { background: rgba(154, 200, 226, 0.25); color: #fff; border-color: var(--accent-main); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); }
+        .next-button { background: rgba(76, 175, 80, 0.25); border-color: rgba(76, 175, 80, 0.4); color: #d4f8d4; font-weight: 500; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+        .next-button:hover { background: rgba(76, 175, 80, 0.35); border-color: var(--next-btn-color); color: #fff; box-shadow: 0 0 30px rgba(76, 175, 80, 0.5); transform: translateY(-3px) scale(1.05); }
+
+        /* 统一的外部跳转 Modal */
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); width: 85vw; max-width: 500px; background: rgba(10, 15, 20, 0.8); border: 1px solid var(--glass-border); border-radius: 24px; backdrop-filter: blur(25px); box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05); z-index: 150; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; align-items: center; padding: 40px 30px; text-align: center; }
+        .modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        .modal-title { font-size: 1.5rem; color: #fff; margin-bottom: 15px; font-weight: 500; letter-spacing: 2px; }
+        .modal-desc { font-size: 1rem; color: var(--accent-light); line-height: 1.8; font-weight: 300; margin-bottom: 30px; }
+        .modal-btn-group { display: flex; gap: 20px; width: 100%; justify-content: center; }
+        .modal-btn { padding: 10px 30px; border-radius: 50px; font-size: 0.95rem; letter-spacing: 1px; cursor: none; transition: all 0.3s; text-decoration: none; border: none; font-family: inherit; }
+        .btn-cancel { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+        .btn-confirm { background: rgba(154, 200, 226, 0.2); color: var(--accent-main); border: 1px solid var(--accent-main); }
+        .btn-confirm:hover { background: rgba(154, 200, 226, 0.3); box-shadow: 0 0 15px rgba(154, 200, 226, 0.4); }
+
+        .copyright-footer { position: fixed; bottom: 20px; left: 0; width: 100%; text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.3); letter-spacing: 1px; z-index: 50; }
+
+        @media (max-width: 768px) {
+            body, html { cursor: auto; } #cursor-dot, #cursor-ring { display: none; }
+            .bg-switcher { top: auto; bottom: 120px; right: 20px; }
+            .top-nav { top: 20px; left: 20px; } 
+            .text-overlay-top { height: 0%; padding-top: 70px; }
+            .text-overlay-bottom { height: 25%; padding-bottom: 90px; }
+            .work-title { font-size: 1.8rem; letter-spacing: 2px; }
+            .work-desc { font-size: 0.95rem; padding: 0 10px; }
+            .image-grid { height: 60vh; gap: 0; }
+            .image-card-wrapper { display: none; }
+            .image-card-wrapper.active { display: flex; width: 80vw; height: auto; max-height: 100%; aspect-ratio: 9 / 16; }
+            .bottom-button-row { bottom: 50px; flex-direction: column; gap: 15px; }
+            .nav-button { min-width: 180px; padding: 10px 30px; font-size: 0.9rem; }
+            .copyright-footer { bottom: 15px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="initial-load-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <div class="top-nav">
+        <a href="https://qtqtericchiu.github.io/world/" class="back-btn page-link interactable">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>返回主页
+        </a>
+    </div>
+
+    <div class="modal" id="jumpConfirmDialog">
+        <h2 class="modal-title">即将离开本站</h2>
+        <p class="modal-desc" id="jumpConfirmText">接下来的链接将跳转至【微信公众号文章】。<br>是否继续前往？</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn btn-cancel interactable" id="cancelJump">取消</button>
+            <button class="modal-btn btn-confirm interactable" id="confirmJump">确认跳转</button>
+        </div>
+    </div>
+
+    <div class="main-container blur-target">
+        
+        <div class="text-overlay-top">
+            <h1 class="work-title">微信公众号推文设计制作</h1>
+        </div>
+
+        <div class="image-grid" id="imageWrapper">
+            <!-- 直接赋予 wrapper interactable，使得整块范围（含透明部分）都能无缝接管点击和动画 -->
+            <div class="image-card-wrapper active interactable" id="imageWrapper1" data-link="https://mp.weixin.qq.com/s/QDNmznyxBrH7NvCu9T1INg" data-title="招新 | 全新 TrySky，全高光亮相。">
+                <div class="image-card">
+                    <img src="https://s1.1ovv.com/2026/03/22/IoAW.jpg" alt="TrySky招新">
+                    <div class="image-label">招新 | 全新 TrySky，全高光亮相。</div>
+                </div>
+            </div>
+            
+            <div class="image-card-wrapper active interactable" id="imageWrapper2" data-link="https://mp.weixin.qq.com/s/pbGgMK1BSluvjffNPt7p7A" data-title="活动回顾 | “才子君仪流商风，曼舞翩然若惊鸿”主题商务礼仪舞会">
+                <div class="image-card">
+                    <img src="https://s1.1ovv.com/2026/03/22/IonV.jpg" alt="商务礼仪舞会">
+                    <div class="image-label">活动回顾 | "才子君仪流商风，曼舞翩然若惊鸿"主题商务礼仪舞会</div>
+                </div>
+            </div>
+            
+            <div class="image-card-wrapper active interactable" id="imageWrapper3" data-link="https://mp.weixin.qq.com/s/OzPuLPBFZ-zV65Sjv570fQ" data-title="你行你为 | 汕大自制微电影 与君相逢首映时">
+                <div class="image-card">
+                    <img src="https://s1.1ovv.com/2026/03/22/IoR4.jpg" alt="汕大自制微电影">
+                    <div class="image-label">你行你为 | 汕大自制微电影 与君相逢首映时</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-overlay-bottom">
+            <p class="work-desc">为学校学院、书院、组织贡献推文作品30余篇，展现创意设计与图文排版能力。</p>
+        </div>
+    </div>
+
+    <div class="bottom-button-row blur-target">
+        <a href="https://qtqtericchiu.github.io/world/works/1/" class="nav-button interactable page-link">上一页</a>
+        <a href="https://qtqtericchiu.github.io/world/works/3/" class="nav-button interactable next-button page-link">下一页</a>
+    </div>
+
+    <div class="copyright-footer blur-target">©Eric Chiu，网页使用AI辅助生成</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { 
+            if (typeof pangu !== 'undefined') pangu.spacingPage(); 
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.image-card-wrapper').forEach(w => w.classList.remove('active'));
+                // 确保移动端初始加载优先显示内容 1（TrySky 招新）
+                document.getElementById('imageWrapper1').classList.add('active');
+            }
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) { document.querySelectorAll('.image-card-wrapper').forEach(w => w.classList.remove('active')); document.getElementById('imageWrapper1').classList.add('active');
+            } else { document.querySelectorAll('.image-card-wrapper').forEach(w => w.classList.add('active')); }
+        });
+
+        /* Bg Sync */
+        const bgs =['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
+        const swBtns = document.querySelectorAll('.sw-btn');
+        let savedIndex = parseInt(sessionStorage.getItem('bg-index')) || 0;
+        function applyBg(index) { document.getElementById('mainBg').style.backgroundImage = `url('${bgs[index]}')`; sessionStorage.setItem('bg-index', index); swBtns.forEach((btn, i) => btn.classList.toggle('active', i == index)); }
+        function changeBg(index) { applyBg(index); }
+        applyBg(savedIndex);
+
+        document.querySelectorAll('.page-link').forEach(link => { link.addEventListener('click', () => { sessionStorage.setItem('cursor-x', mouseX); sessionStorage.setItem('cursor-y', mouseY); }); });
+
+        /* Wechat Modal Jump Logic */
+        let cLink='', cTitle='';
+        const dlg = document.getElementById('jumpConfirmDialog'), txt = document.getElementById('jumpConfirmText'), bt = document.querySelectorAll('.blur-target');
+        
+        // 绑定范围扩大到卡片外层的包装器，保证只要触碰卡片周围也能实现完美跳转
+        document.querySelectorAll('.image-card-wrapper').forEach(w => {
+            w.addEventListener('click', () => {
+                cLink = w.getAttribute('data-link'); 
+                cTitle = w.getAttribute('data-title');
+                txt.innerHTML = `接下来的链接将跳转至<br><strong>${cTitle}</strong><br>是否继续前往？`;
+                dlg.classList.add('active'); 
+                bt.forEach(el => el.classList.add('blurred'));
+            });
+        });
+        document.getElementById('cancelJump').addEventListener('click', () => { dlg.classList.remove('active'); bt.forEach(el => el.classList.remove('blurred')); });
+        document.getElementById('confirmJump').addEventListener('click', () => { if(cLink) window.open(cLink, '_blank'); dlg.classList.remove('active'); bt.forEach(el => el.classList.remove('blurred')); });
+
+        /* 3D Cards Physics Engine */
+        const buttons = document.querySelectorAll('.nav-button'), imageCards = document.querySelectorAll('.image-card');
+        let bdArray = Array.from(buttons).map(b => ({ el: b, d: 15+Math.random()*10, cx: 0, cy: 0, tx: 0, ty: 0 }));
+        let cdArray = Array.from(imageCards).map(c => ({ el: c, frX: 0, frY: 0 }));
+        let rx = 0, ry = 0;
+        window.addEventListener('mousemove', e => { rx = (e.clientX / window.innerWidth - 0.5) * 2; ry = (e.clientY / window.innerHeight - 0.5) * 2; });
+        function renderPhysics() {
+            bdArray.forEach(b => { b.tx = -rx * b.d; b.ty = -ry * b.d; b.cx += (b.tx - b.cx) * 0.15; b.cy += (b.ty - b.cy) * 0.15; b.el.style.transform = `translate(${b.cx}px, ${b.cy}px)`; });
+            cdArray.forEach(c => {
+                c.frX += (-ry * 8 - c.frX) * 0.1; c.frY += (rx * 8 - c.frY) * 0.1;
+                c.el.style.transform = `rotateX(${c.frX}deg) rotateY(${c.frY}deg)`;
+                c.el.style.boxShadow = `${c.frY * 2}px ${-c.frX * 2}px ${15 + Math.abs(c.frX) + Math.abs(c.frY)}px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)`;
+            });
+            requestAnimationFrame(renderPhysics);
+        }
+        setTimeout(() => requestAnimationFrame(renderPhysics), 1000);
+
+        /* Cursor System */
+        const cursorDot = document.getElementById('cursor-dot'), cursorRing = document.getElementById('cursor-ring');
+        let mouseX = parseFloat(sessionStorage.getItem('cursor-x')) || window.innerWidth / 2, mouseY = parseFloat(sessionStorage.getItem('cursor-y')) || window.innerHeight / 2;
+        let ringX = mouseX, ringY = mouseY, isCA = false;
+        function updateCursor(e) { if(!isCA) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCA = true; } mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`; }
+        window.addEventListener('mousemove', updateCursor); window.addEventListener('touchstart', () => { isCA = false; cursorDot.style.opacity = '0'; cursorRing.style.opacity = '0'; document.body.style.cursor = 'auto'; });
+        function renderCursor() { if(isCA || sessionStorage.getItem('cursor-x')) { if(!isCA){cursorDot.style.opacity='1';cursorRing.style.opacity='1';isCA=true;} ringX += (mouseX - ringX)*0.2; ringY += (mouseY - ringY)*0.2; cursorRing.style.transform=`translate(${ringX}px, ${ringY}px)`; cursorDot.style.transform=`translate(${mouseX}px, ${mouseY}px)`; } requestAnimationFrame(renderCursor); }
+        renderCursor();
+        document.querySelectorAll('.interactable').forEach(el => { el.addEventListener('mouseenter', () => { cursorDot.classList.add('hovered'); cursorRing.classList.add('hovered'); }); el.addEventListener('mouseleave', () => { cursorDot.classList.remove('hovered'); cursorRing.classList.remove('hovered'); }); });
+
+        /* Particles System */
+        const cvs = document.getElementById('particle-canvas'), ctx = cvs.getContext('2d');
+        let pts =[], aM = { x: null, y: null };
+        function rsz() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; } window.addEventListener('resize', rsz); rsz();
+        window.addEventListener('mousemove', e => { aM.x = e.clientX; aM.y = e.clientY; });
+        class P {
+            constructor() { this.x = Math.random()*cvs.width; this.y = Math.random()*cvs.height; this.s = Math.random()*1.5+0.5; this.a = Math.random()*0.6+0.2; this.vx = (Math.random()-0.5); this.vy = (Math.random()-0.5); }
+            dr() { ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI*2); ctx.fillStyle = `rgba(154, 200, 226, ${this.a})`; ctx.fill(); }
+            up() {
+                let sp = Math.hypot(this.vx, this.vy);
+                if(sp<3 && aM.x!=null && aM.y!=null) { let dx=aM.x-this.x, dy=aM.y-this.y, d=Math.hypot(dx,dy); if(d<350){ let f=(350-d)/350; if(d>40){this.vx+=(dx/d)*f*0.5;this.vy+=(dy/d)*f*0.5;}else{this.vx-=(dx/d)*f*0.8;this.vy-=(dy/d)*f*0.8;} this.vx+=(-dy/d)*f*0.35; this.vy+=(dx/d)*f*0.35; this.a=Math.min(this.a+0.05,1); }else this.a=Math.max(this.a-0.01,0.2); }else this.a=Math.max(this.a-0.01,0.2);
+                this.vx*=0.94; this.vy*=0.94; this.x+=this.vx; this.y+=this.vy;
+                if(this.x<0) this.x=cvs.width; else if(this.x>cvs.width) this.x=0; if(this.y<0) this.y=cvs.height; else if(this.y>cvs.height) this.y=0; this.dr();
+            }
+        }
+        for(let i=0; i<Math.min(Math.floor((cvs.width*cvs.height)/6000),350); i++) pts.push(new P());
+        function anim() { ctx.clearRect(0,0,cvs.width,cvs.height); pts.forEach(p=>p.up()); requestAnimationFrame(anim); } anim();
+    </script>
+</body>
+</html>
