@@ -9,27 +9,23 @@
     <link rel="prefetch" href="timeline/">
     <link rel="prefetch" href="https://qtqtericchiu.github.io/blog/">
 
-    <!-- [现代过渡] 开启 Chrome MPA 跨文档视图转换 -->
     <style>
+        /* View Transition */
         @view-transition { navigation: auto; }
-        /* 定制视图转换动画：纯粹的交叉淡入淡出 */
         ::view-transition-old(root) { animation: fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         ::view-transition-new(root) { animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1); mix-blend-mode: normal; }
         @keyframes fade-out { to { opacity: 0; } }
         @keyframes fade-in { from { opacity: 0; } }
     </style>
 
-    <!-- [极致防闪烁] 动态写入首屏同步样式，确保背景与遮罩层严格按层级渲染 -->
     <script>
         (function() {
             const bgs = ['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
             let savedIndex = sessionStorage.getItem('bg-index');
             if (savedIndex === null) { savedIndex = Math.floor(Math.random() * bgs.length); sessionStorage.setItem('bg-index', savedIndex); }
-            document.write(`<style>#mainBg { background-image: url('${bgs[savedIndex]}'); }</style>`);
+            document.write(`<style>#mainBg{background-image:url('${bgs[savedIndex]}')}</style>`);
         })();
     </script>
-
-    <!-- 引入 Pangu.js (使用 jsDelivr CDN 避免 GitHub Raw MIME 类型拦截) -->
     <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
 
     <style>
@@ -38,12 +34,12 @@
         html { background-color: #000; }
         body, html { width: 100%; height: 100%; overflow: hidden; font-family: "OPPO Sans 4.0", "OPPO Sans", sans-serif; color: #fff; cursor: none; }
 
-        /* 仅用于浏览器首次冷启动进入网站时的黑屏渐明，内部跳转由 View Transitions 接管 */
         #initial-load-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes removeBlackScreen { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
-        #cursor-dot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%; margin: -3px 0 0 -3px; pointer-events: none; z-index: 99998; will-change: transform; opacity: 0; }
-        #cursor-ring { position: fixed; top: 0; left: 0; width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%; margin: -18px 0 0 -18px; pointer-events: none; z-index: 99997; will-change: transform; opacity: 0; }
+        #cursor-dot, #cursor-ring { position: fixed; top: 0; left: 0; pointer-events: none; will-change: transform; opacity: 0; }
+        #cursor-dot { width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%; margin: -3px 0 0 -3px; z-index: 99998; }
+        #cursor-ring { width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%; margin: -18px 0 0 -18px; z-index: 99997; }
         #cursor-dot.hovered { width: 10px; height: 10px; margin: -5px 0 0 -5px; box-shadow: 0 0 15px var(--accent-main); background: #fff; }
         #cursor-ring.hovered { width: 55px; height: 55px; margin: -27.5px 0 0 -27.5px; background-color: rgba(154, 200, 226, 0.1); border-color: transparent; }
 
@@ -60,8 +56,7 @@
         .entry-points.blurred { filter: blur(8px); opacity: 0; pointer-events: none !important; }
 
         @keyframes floatIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-        /* 废除 translate3d，纯粹使用 translate 避免未来被加速破坏滤镜 */
-        .node { position: absolute; padding: 15px 30px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--accent-light); text-decoration: none; font-weight: 300; letter-spacing: 2px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none; opacity: 0; animation: floatIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; transition: box-shadow 0.4s, border-color 0.4s, color 0.4s; will-change: transform; }
+        .node { position: absolute; padding: 15px 30px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--accent-light); text-decoration: none; font-weight: 300; letter-spacing: 2px; backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none; opacity: 0; animation: floatIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; transition: box-shadow 0.4s, border-color 0.4s, color 0.4s; will-change: transform; }
         .node::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 30px; box-shadow: inset 0 0 20px rgba(154, 200, 226, 0); transition: all 0.4s ease; pointer-events: none; }
         .node:hover { color: #fff; border-color: var(--accent-main); box-shadow: 0 0 25px rgba(154, 200, 226, 0.25); text-shadow: 0 0 10px var(--accent-main); }
         .node:hover::before { box-shadow: inset 0 0 20px rgba(154, 200, 226, 0.2); }
@@ -78,7 +73,7 @@
         .bio { font-size: 1rem; color: var(--accent-light); line-height: 1.8; max-width: 80%; font-weight: 300; text-align: justify;}
 
         .bottom-dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 40; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .toggle-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(15px); border-radius: 50px; padding: 10px 30px; color: var(--accent-main); font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: none; text-decoration: none; }
+        .toggle-btn { background: rgba(154, 200, 226, 0.03); border: 1px solid var(--glass-border); backdrop-filter: blur(15px); border-radius: 50px; padding: 10px 30px; color: var(--accent-main); font-size: 0.9rem; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: none; text-decoration: none; }
         .toggle-btn:hover { background: rgba(154, 200, 226, 0.15); box-shadow: 0 0 15px rgba(154, 200, 226, 0.4); }
         .toggle-btn svg { transition: transform 0.3s ease; }
         .dock-panel { background: rgba(10, 10, 10, 0.6); border: 1px solid var(--glass-border); backdrop-filter: blur(25px); border-radius: 20px; padding: 15px 20px; display: flex; gap: 15px; opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 40px rgba(0,0,0,0.8); max-width: 90vw; overflow-x: auto; scrollbar-width: none; }
@@ -156,9 +151,9 @@
     </div>
 
     <script>
-        // Pangu.js 自动盘古之白排版
         document.addEventListener('DOMContentLoaded', () => { if (typeof pangu !== 'undefined') pangu.spacingPage(); });
 
+        /* Bg Sync */
         const bgs = ['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
         const swBtns = document.querySelectorAll('.sw-btn');
         let savedIndex = sessionStorage.getItem('bg-index') || 0;
@@ -166,8 +161,7 @@
         function changeBg(index) { applyBg(index); }
         applyBg(savedIndex);
 
-        // [现代过渡] 仅记录鼠标位置给下一页渲染光标，不干涉原生默认的A标签跳转。
-        // 由于 CSS 中设置了 @view-transition，Chrome 会自动执行截图和交叉淡入淡出！
+        /* View Transition Navigation */
         document.querySelectorAll('.page-link').forEach(link => {
             link.addEventListener('click', () => {
                 sessionStorage.setItem('cursor-x', mouseX);
@@ -175,6 +169,7 @@
             });
         });
 
+        /* Nodes Animation */
         const nodes = document.querySelectorAll('.node');
         let mouseRatioX = 0, mouseRatioY = 0;
         window.addEventListener('mousemove', e => { mouseRatioX = (e.clientX / window.innerWidth - 0.5) * 2; mouseRatioY = (e.clientY / window.innerHeight - 0.5) * 2; });
@@ -189,10 +184,10 @@
         }
         setTimeout(() => requestAnimationFrame(renderNodes), 1000);
 
+        /* Cursor System */
         const cursorDot = document.getElementById('cursor-dot'), cursorRing = document.getElementById('cursor-ring');
         let mouseX = parseFloat(sessionStorage.getItem('cursor-x')) || window.innerWidth / 2, mouseY = parseFloat(sessionStorage.getItem('cursor-y')) || window.innerHeight / 2;
         let ringX = mouseX, ringY = mouseY, isCursorActive = false;
-
         function updateCursorPos(e) { if(!isCursorActive) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCursorActive = true; } mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`; }
         window.addEventListener('mousemove', updateCursorPos);
         window.addEventListener('touchstart', () => { isCursorActive = false; cursorDot.style.opacity = '0'; cursorRing.style.opacity = '0'; document.body.style.cursor = 'auto'; });
@@ -200,24 +195,24 @@
             if (isCursorActive || sessionStorage.getItem('cursor-x')) { 
                 if(!isCursorActive) { cursorDot.style.opacity='1'; cursorRing.style.opacity='1'; isCursorActive=true; }
                 ringX += (mouseX - ringX) * 0.2; ringY += (mouseY - ringY) * 0.2; 
-                cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`; 
-                cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+                cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`; cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
             } requestAnimationFrame(renderCursor); 
         }
         renderCursor();
-
         document.querySelectorAll('.interactable').forEach(el => { el.addEventListener('mouseenter', () => { cursorDot.classList.add('hovered'); cursorRing.classList.add('hovered'); }); el.addEventListener('mouseleave', () => { cursorDot.classList.remove('hovered'); cursorRing.classList.remove('hovered'); }); });
 
+        /* UI Interactions */
         const toggleBtn = document.getElementById('toggleBtn'), dockPanel = document.getElementById('dockPanel'), btnSvg = toggleBtn.querySelector('svg');
         const entryPoints = document.getElementById('entryPoints'), aboutModal = document.getElementById('aboutModal'), blogModal = document.getElementById('blogModal');
         let isDockOpen = false;
-        function setDockState(open) { isDockOpen = open; if(isDockOpen) { dockPanel.classList.add('active'); btnSvg.style.transform = 'rotate(-90deg)'; toggleBtn.style.background = 'rgba(154, 200, 226, 0.2)'; } else { dockPanel.classList.remove('active'); btnSvg.style.transform = 'rotate(0deg)'; toggleBtn.style.background = 'var(--glass-bg)'; } }
+        function setDockState(open) { isDockOpen = open; if(isDockOpen) { dockPanel.classList.add('active'); btnSvg.style.transform = 'rotate(-90deg)'; toggleBtn.style.background = 'rgba(154, 200, 226, 0.2)'; } else { dockPanel.classList.remove('active'); btnSvg.style.transform = 'rotate(0deg)'; toggleBtn.style.background = 'rgba(154, 200, 226, 0.03)'; } }
         toggleBtn.addEventListener('click', () => setDockState(!isDockOpen));
         document.getElementById('btn-about').addEventListener('click', () => { aboutModal.classList.add('active'); entryPoints.classList.add('blurred'); setDockState(true); });
         document.getElementById('closeAboutBtn').addEventListener('click', () => { aboutModal.classList.remove('active'); entryPoints.classList.remove('blurred'); setDockState(false); });
         document.getElementById('btn-blog').addEventListener('click', () => { blogModal.classList.add('active'); entryPoints.classList.add('blurred'); });
         document.getElementById('cancelBlogBtn').addEventListener('click', () => { blogModal.classList.remove('active'); entryPoints.classList.remove('blurred'); });
         
+        /* Particles */
         const canvas = document.getElementById('particle-canvas'); const ctx = canvas.getContext('2d'); let particlesArray =[], activeMouse = { x: null, y: null };
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
         window.addEventListener('mousemove', e => { activeMouse.x = e.clientX; activeMouse.y = e.clientY; });
