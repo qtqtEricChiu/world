@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>作品展示 - mocabolka.world</title>
+    
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+
+    <style>
+        @view-transition { navigation: auto; }
+        ::view-transition-old(root) { animation: fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        ::view-transition-new(root) { animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1); mix-blend-mode: normal; }
+        @keyframes fade-out { to { opacity: 0; } }
+        @keyframes fade-in { from { opacity: 0; } }
+    </style>
+
+    <script>
+        (function() {
+            const bgs =['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
+            const savedIndex = sessionStorage.getItem('bg-index') || 0;
+            document.write(`<style>#mainBg{background-image:url('${bgs[savedIndex]}')}</style>`);
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        :root { --accent-main: #9ac8e2; --accent-light: #cce5f4; --accent-dark: #7ab0d1; --glass-bg: rgba(10, 15, 20, 0.55); --glass-border: rgba(154, 200, 226, 0.2); --next-btn-color: #4CAF50; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { background-color: #000; }
+        body, html { width: 100%; height: 100%; overflow: hidden; font-family: "OPPO Sans 4.0", "OPPO Sans", sans-serif; color: #fff; cursor: none; }
+
+        #initial-load-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 99999; pointer-events: none; animation: removeBlackScreen 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes removeBlackScreen { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+
+        #cursor-dot, #cursor-ring { position: fixed; top: 0; left: 0; pointer-events: none; will-change: transform; opacity: 0; }
+        #cursor-dot { width: 6px; height: 6px; background: var(--accent-main); border-radius: 50%; margin: -3px 0 0 -3px; z-index: 99998; }
+        #cursor-ring { width: 36px; height: 36px; border: 1px solid rgba(154, 200, 226, 0.5); border-radius: 50%; margin: -18px 0 0 -18px; z-index: 99997; }
+        #cursor-dot.hovered { width: 10px; height: 10px; margin: -5px 0 0 -5px; box-shadow: 0 0 15px var(--accent-main); background: #fff; }
+        #cursor-ring.hovered { width: 55px; height: 55px; margin: -27.5px 0 0 -27.5px; background-color: rgba(154, 200, 226, 0.1); border-color: transparent; }
+
+        .bg-wrapper { position: absolute; top: -2%; left: -2%; width: 104%; height: 104%; z-index: -2; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; }
+        .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: rgba(5, 5, 5, 0.75); }
+        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        .bg-switcher { position: fixed; top: 30px; right: 40px; z-index: 100; display: flex; gap: 10px; padding: 8px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 12px; }
+        .sw-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); cursor: none; background-size: cover; background-position: center; transition: transform 0.3s, border-color 0.3s; }
+        .sw-btn:hover { transform: scale(1.1); border-color: var(--accent-main); }
+        .sw-btn.active { border-color: var(--accent-main); box-shadow: 0 0 10px var(--accent-main); }
+
+        .top-nav { position: fixed; top: 30px; left: 40px; z-index: 100; display: flex; align-items: center; }
+        .back-btn { display: flex; align-items: center; gap: 10px; color: var(--accent-light); text-decoration: none; font-size: 1.1rem; letter-spacing: 2px; padding: 8px 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(154, 200, 226, 0.1); transition: all 0.3s ease; }
+        .back-btn:hover { color: #fff; transform: translateX(-5px); border-color: var(--accent-main); background: rgba(154, 200, 226, 0.1); }
+
+        .main-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 10; padding: 0; overflow: hidden; }
+        
+        .text-overlay-top { position: absolute; top: 0; left: 0; width: 100%; height: 30%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; z-index: 20; padding: 70px 20px 0 20px; pointer-events: none; }
+        .work-title { font-size: 1.875rem; font-weight: 300; letter-spacing: 3px; margin-bottom: 15px; color: #fff; text-shadow: 0 0 20px rgba(154, 200, 226, 0.5); line-height: 1.2; }
+        .work-desc { font-size: 0.9rem; line-height: 1.6; color: var(--accent-light); font-weight: 350; max-width: 800px; margin: 0 auto; opacity: 0.9; }
+
+        .folder-view { display: flex; width: 100%; height: 50vh; align-items: center; justify-content: center; position: absolute; top: 52%; transform: translateY(-50%); z-index: 10; }
+        
+        .scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-light); z-index: 50; transition: all 0.3s ease; border: none; outline: none; }
+        .scroll-btn:hover { background: rgba(154, 200, 226, 0.2); color: #fff; transform: translateY(-50%) scale(1.1); border: 1px solid var(--accent-main); }
+        .scroll-btn.left { left: 30px; }
+        .scroll-btn.right { right: 30px; }
+
+        .folder-container { width: 100%; height: 100%; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 10vw; gap: 40px; scroll-behavior: smooth; }
+        .folder-container::-webkit-scrollbar { display: none; } 
+        
+        .doc-slot { position: relative; flex: 0 0 clamp(300px, 35vw, 600px); scroll-snap-align: center; height: auto; cursor: none; }
+        
+        .doc-card { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.25, 1, 0.35, 1), box-shadow 0.4s ease; overflow: hidden; pointer-events: none; }
+        .doc-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; transition: opacity 0.4s ease, transform 0.4s ease; }
+        
+        .doc-slot:hover .doc-card, .doc-slot.mobile-active .doc-card { transform: translateY(-25px); box-shadow: 0 25px 45px rgba(0,0,0,0.7); border-color: rgba(154, 200, 226, 0.8); }
+        .doc-slot:hover .doc-card img, .doc-slot.mobile-active .doc-card img { opacity: 1; transform: scale(1.04); }
+
+        .doc-label { position: absolute; top: 15px; left: 50%; transform: translateX(-50%) translateY(-15px); width: 90%; text-align: center; color: #fff; font-size: 0.85rem; letter-spacing: 1px; background: rgba(10, 15, 20, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(154, 200, 226, 0.3); padding: 12px 10px; border-radius: 8px; opacity: 0; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 5; pointer-events: none; }
+        .doc-slot:hover .doc-label, .doc-slot.mobile-active .doc-label { opacity: 1; transform: translateX(-50%) translateY(0); }
+        
+        .doc-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+        .doc-slot:hover .doc-card::after, .doc-slot.mobile-active .doc-card::after { opacity: 1; }
+
+        /* 底部导航区域 */
+        .bottom-button-row { position: fixed; bottom: 60px; left: 0; width: 100%; display: flex; gap: 30px; justify-content: center; align-items: center; z-index: 30; padding: 0 20px; pointer-events: none; }
+        .nav-button { padding: 12px 35px; background: rgba(154, 200, 226, 0.15); border: 1px solid var(--glass-border); border-radius: 30px; color: var(--accent-light); text-decoration: none; font-size: 1rem; letter-spacing: 1.5px; transition: all 0.3s ease; backdrop-filter: blur(10px); text-align: center; min-width: 200px; pointer-events: auto; display: flex; align-items: center; justify-content: center; cursor: none; will-change: transform; }
+        .nav-button:hover { background: rgba(154, 200, 226, 0.25); color: #fff; border-color: var(--accent-main); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); }
+        .next-button { background: rgba(76, 175, 80, 0.25); border-color: rgba(76, 175, 80, 0.4); color: #d4f8d4; font-weight: 500; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+        .next-button:hover { background: rgba(76, 175, 80, 0.35); border-color: var(--next-btn-color); color: #fff; box-shadow: 0 0 30px rgba(76, 175, 80, 0.5); }
+
+        .copyright-footer { position: fixed; bottom: 20px; left: 0; width: 100%; text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.3); letter-spacing: 1px; z-index: 50; }
+
+        @media (max-width: 768px) {
+            body, html { cursor: auto; } #cursor-dot, #cursor-ring { display: none; }
+            .scroll-btn { display: none; }
+            .bg-switcher { top: auto; bottom: 120px; right: 20px; }
+            .top-nav { top: 20px; left: 20px; } 
+            .text-overlay-top { padding-top: 70px; }
+            .work-title { font-size: 1.5rem; }
+            .work-desc { font-size: 0.85rem; }
+            .doc-slot { flex: 0 0 82vw; }
+            .folder-view { top: 50%; }
+            .bottom-button-row { bottom: 50px; flex-direction: column; gap: 15px; }
+            .nav-button { min-width: 180px; transform: none !important; } /* 移动端关掉浮动 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="initial-load-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <div class="top-nav">
+        <a href="https://qtqtericchiu.github.io/world/" class="back-btn page-link interactable">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>返回主页
+        </a>
+    </div>
+
+    <div class="main-container">
+        
+        <div class="text-overlay-top">
+            <h1 class="work-title">幻灯片设计制作 及 研究方向展示</h1>
+            <p class="work-desc">与多学科学生开展合作，作为主要制作者完成课题及比赛用原创幻灯片设计</p>
+        </div>
+
+        <div class="folder-view">
+            <button class="scroll-btn left interactable" id="scrollLeftBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+
+            <div class="folder-container" id="folderContainer">
+                <!-- 1. 挑战杯-科技发明 -->
+                <div class="doc-slot interactable">
+                    <div class="doc-card">
+                        <img src="https://s1.1ovv.com/2026/03/23/IAvg.png" alt="挑战杯-科技发明">
+                        <div class="doc-label">挑战杯-科技发明</div>
+                    </div>
+                </div>
+
+                <!-- 2. 正大杯-地域产业 -->
+                <div class="doc-slot interactable">
+                    <div class="doc-card">
+                        <img src="https://s1.1ovv.com/2026/03/23/IA5A.png" alt="正大杯-地域产业">
+                        <div class="doc-label">正大杯-地域产业</div>
+                    </div>
+                </div>
+
+                <!-- 3. 国创赛-古迹创新 -->
+                <div class="doc-slot interactable">
+                    <div class="doc-card">
+                        <img src="https://s1.1ovv.com/2026/03/23/IAFq.png" alt="国创赛-古迹创新">
+                        <div class="doc-label">国创赛-古迹创新</div>
+                    </div>
+                </div>
+
+                <!-- 4. 挑战杯-社会服务 -->
+                <div class="doc-slot interactable">
+                    <div class="doc-card">
+                        <img src="https://s1.1ovv.com/2026/03/23/I6j1.png" alt="挑战杯-社会服务">
+                        <div class="doc-label">挑战杯-社会服务</div>
+                    </div>
+                </div>
+
+                <!-- 5. CMAU-非遗创新 -->
+                <div class="doc-slot interactable">
+                    <div class="doc-card">
+                        <img src="https://s1.1ovv.com/2026/03/23/IANN.png" alt="CMAU-非遗创新">
+                        <div class="doc-label">CMAU-非遗创新</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="scroll-btn right interactable" id="scrollRightBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="bottom-button-row">
+        <a href="https://qtqtericchiu.github.io/world/works/2/" class="nav-button interactable page-link">上一页</a>
+        <a href="https://qtqtericchiu.github.io/world/works/4/" class="nav-button interactable next-button page-link">下一页</a>
+    </div>
+
+    <div class="copyright-footer">©Eric Chiu，网页使用AI辅助生成</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { 
+            if (typeof pangu !== 'undefined') pangu.spacingPage(); 
+            
+            const container = document.getElementById('folderContainer');
+            const slots = document.querySelectorAll('.doc-slot');
+
+            // 左右按钮滑动
+            document.getElementById('scrollLeftBtn').onclick = () => container.scrollBy({ left: -400, behavior: 'smooth' });
+            document.getElementById('scrollRightBtn').onclick = () => container.scrollBy({ left: 400, behavior: 'smooth' });
+
+            // 手机端专用点击逻辑
+            slots.forEach((slot) => {
+                slot.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        slots.forEach(s => s.classList.remove('mobile-active'));
+                        slot.classList.add('mobile-active');
+                    }
+                });
+            });
+            if(slots.length > 0 && window.innerWidth <= 768) slots[0].classList.add('mobile-active');
+        });
+
+        /* Bg Sync */
+        const bgs =['https://s1.1ovv.com/2026/03/21/Ix6I.png','https://s1.1ovv.com/2026/03/21/IxkP.png','https://s1.1ovv.com/2026/03/21/I5rf.png','https://s1.1ovv.com/2026/03/21/I5Wi.png'];
+        const swBtns = document.querySelectorAll('.sw-btn');
+        let savedIndex = parseInt(sessionStorage.getItem('bg-index')) || 0;
+        function applyBg(index) { document.getElementById('mainBg').style.backgroundImage = `url('${bgs[index]}')`; sessionStorage.setItem('bg-index', index); swBtns.forEach((btn, i) => btn.classList.toggle('active', i == index)); }
+        function changeBg(index) { applyBg(index); }
+        applyBg(savedIndex);
+
+        /* 物理悬浮引擎（磁吸动画） */
+        const navButtons = document.querySelectorAll('.nav-button');
+        let bdArray = Array.from(navButtons).map(b => ({ el: b, d: 15 + Math.random() * 10, cx: 0, cy: 0, tx: 0, ty: 0 }));
+        let rx = 0, ry = 0;
+
+        window.addEventListener('mousemove', e => { 
+            // 归一化坐标：中心为0，左/上为负，右/下为正
+            rx = (e.clientX / window.innerWidth - 0.5) * 2; 
+            ry = (e.clientY / window.innerHeight - 0.5) * 2; 
+        });
+
+        function renderPhysics() {
+            // 只有大屏幕才有物理浮动
+            if (window.innerWidth > 768) {
+                bdArray.forEach(b => {
+                    b.tx = -rx * b.d; 
+                    b.ty = -ry * b.d; 
+                    // 补间动画：让当前位置慢慢追上目标位置，形成平滑的晃动
+                    b.cx += (b.tx - b.cx) * 0.12; 
+                    b.cy += (b.ty - b.cy) * 0.12; 
+                    b.el.style.transform = `translate(${b.cx}px, ${b.cy}px)`;
+                });
+            }
+            requestAnimationFrame(renderPhysics);
+        }
+        requestAnimationFrame(renderPhysics);
+
+        /* Cursor System */
+        const cursorDot = document.getElementById('cursor-dot'), cursorRing = document.getElementById('cursor-ring');
+        let mouseX = parseFloat(sessionStorage.getItem('cursor-x')) || window.innerWidth / 2, mouseY = parseFloat(sessionStorage.getItem('cursor-y')) || window.innerHeight / 2;
+        let ringX = mouseX, ringY = mouseY, isCA = false;
+        function updateCursor(e) { if(!isCA) { cursorDot.style.opacity = '1'; cursorRing.style.opacity = '1'; document.body.style.cursor = 'none'; isCA = true; } mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`; }
+        window.addEventListener('mousemove', updateCursor); window.addEventListener('touchstart', () => { isCA = false; cursorDot.style.opacity = '0'; cursorRing.style.opacity = '0'; document.body.style.cursor = 'auto'; });
+        function renderCursor() { if(isCA || sessionStorage.getItem('cursor-x')) { if(!isCA){cursorDot.style.opacity='1';cursorRing.style.opacity='1';isCA=true;} ringX += (mouseX - ringX)*0.2; ringY += (mouseY - ringY)*0.2; cursorRing.style.transform=`translate(${ringX}px, ${ringY}px)`; cursorDot.style.transform=`translate(${mouseX}px, ${mouseY}px)`; } requestAnimationFrame(renderCursor); }
+        renderCursor();
+        document.querySelectorAll('.interactable').forEach(el => { el.addEventListener('mouseenter', () => { cursorDot.classList.add('hovered'); cursorRing.classList.add('hovered'); }); el.addEventListener('mouseleave', () => { cursorDot.classList.remove('hovered'); cursorRing.classList.remove('hovered'); }); });
+
+        /* Particles System */
+        const cvs = document.getElementById('particle-canvas'), ctx = cvs.getContext('2d');
+        let pts = []; let aM = { x: null, y: null };
+        function rsz() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; } window.addEventListener('resize', rsz); rsz();
+        window.addEventListener('mousemove', e => { aM.x = e.clientX; aM.y = e.clientY; });
+        class P {
+            constructor() { this.x = Math.random()*cvs.width; this.y = Math.random()*cvs.height; this.s = Math.random()*1.5+0.5; this.a = Math.random()*0.6+0.2; this.vx = (Math.random()-0.5); this.vy = (Math.random()-0.5); }
+            dr() { ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI*2); ctx.fillStyle = `rgba(154, 200, 226, ${this.a})`; ctx.fill(); }
+            up() {
+                let sp = Math.hypot(this.vx, this.vy);
+                if(sp<3 && aM.x!=null && aM.y!=null) { let dx=aM.x-this.x, dy=aM.y-this.y, d=Math.hypot(dx,dy); if(d<350){ let f=(350-d)/350; if(d>40){this.vx+=(dx/d)*f*0.5;this.vy+=(dy/d)*f*0.5;}else{this.vx-=(dx/d)*f*0.8;this.vy-=(dy/d)*f*0.8;} this.vx+=(-dy/d)*f*0.35; this.vy+=(dx/d)*f*0.35; this.a=Math.min(this.a+0.05,1); }else this.a=Math.max(this.a-0.01,0.2); }else this.a=Math.max(this.a-0.01,0.2);
+                this.vx*=0.94; this.vy*=0.94; this.x+=this.vx; this.y+=this.vy;
+                if(this.x<0) this.x=cvs.width; else if(this.x>cvs.width) this.x=0; if(this.y<0) this.y=cvs.height; else if(this.y>cvs.height) this.y=0; this.dr();
+            }
+        }
+        for(let i=0; i<Math.min(Math.floor((cvs.width*cvs.height)/6000),350); i++) pts.push(new P());
+        function anim() { ctx.clearRect(0,0,cvs.width,cvs.height); pts.forEach(p=>p.up()); requestAnimationFrame(anim); } anim();
+    </script>
+</body>
+</html>
