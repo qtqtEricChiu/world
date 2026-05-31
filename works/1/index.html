@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>作品展示 - mocabolka.world</title>
+
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+    <link rel="prefetch" href="../">
+
+    <!-- 共用样式 -->
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+
+    <!-- 背景预初始化 -->
+    <script src="../../js/bg-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        /* ---- works/1 专用样式 ---- */
+        .bg-overlay { background: rgba(5, 5, 5, 0.75); }
+
+        .main-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px;
+            perspective: 1000px;
+            opacity: 0;
+            animation: worksFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes worksFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            transform-style: preserve-3d;
+        }
+
+        .iframe-container {
+            width: 100vw;
+            height: 100vh;
+            transform: scale(0.75);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            opacity: 0;
+            animation: worksFadeIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.08s forwards;
+        }
+
+        #works-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .text-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+            padding: 40px 20px 60px 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0) 100%);
+            border-radius: 0 0 20px 20px;
+            pointer-events: none;
+        }
+
+        /* btnLark 与主页 toggle-btn 统一风格 */
+        #btnLark {
+            border-radius: 50px;
+            padding: 10px 30px;
+            font-size: 0.9rem;
+            background: rgba(154, 200, 226, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--accent-main);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            min-width: auto;
+            letter-spacing: 1px;
+        }
+        #btnLark:hover {
+            background: rgba(154, 200, 226, 0.15);
+            box-shadow: 0 0 15px rgba(154, 200, 226, 0.4);
+            color: #fff;
+        }
+
+        /* 统一 works 标题样式 */
+        .work-title {
+            font-size: 2.2rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(154, 200, 226, 0.5);
+            line-height: 1.2;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .work-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 35%;
+            width: 30%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-main), transparent);
+        }
+
+        .work-desc {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--accent-light);
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .bg-switcher { top: auto; bottom: calc(100px + var(--safe-bottom)); right: 12px; }
+            .top-nav { top: calc(16px + var(--safe-top)); left: 12px; }
+            .back-btn { font-size: 0.85rem; padding: 6px 14px; border-radius: 16px; }
+            .back-btn svg { width: 16px; height: 16px; }
+            .main-container { padding: 10px; }
+            .iframe-wrapper { padding: 0 5px; }
+            .iframe-container {
+                border-radius: 14px;
+                transform: scale(0.9);
+                width: 110vw;
+                height: 110vh;
+            }
+            .text-overlay { height: 48%; padding: 24px 12px 36px 12px; border-radius: 0 0 14px 14px; }
+            .work-title { font-size: 1.5rem; letter-spacing: 2px; margin-bottom: 8px; padding-bottom: 12px; }
+            .work-title::after { left: 30%; width: 40%; }
+            .work-desc { font-size: 0.85rem; line-height: 1.5; padding: 0 8px; }
+            #btnLark { padding: 8px 22px; font-size: 0.8rem; }
+            .copyright-footer { bottom: calc(12px + var(--safe-bottom)); font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body class="sub-page">
+
+    <div id="initial-load-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <div class="top-nav">
+        <a href="../../" class="back-btn page-link interactable">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>返回主页
+        </a>
+    </div>
+
+    <div class="main-container blur-target">
+        <div class="iframe-wrapper" id="iframeWrapper">
+            <div class="iframe-container" id="iframeContainer">
+                <iframe id="works-frame" src="https://qtqtericchiu.github.io/world/" title="作品展示框架"></iframe>
+                <div class="text-overlay">
+                    <h1 class="work-title">HTML&CSS基础 及 AI Coding能力</h1>
+                    <p class="work-desc">具有代码基础和明确的设计意图，熟练使用调试工具提升代码生成质量，借助AI工具完成站点呈现。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-button-row blur-target">
+        <button id="btnLark" class="nav-button interactable">
+            跳转至文本产出成果
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 6px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+        <a href="../2/" class="nav-button interactable next-button page-link">下一页</a>
+    </div>
+
+    <div class="modal" id="LarkModal">
+        <h2 class="modal-title">温馨提示</h2>
+        <p class="modal-desc">接下来的链接将跳转至【飞书文档】，以查看文本产出成果。<br>是否继续前往？</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn btn-cancel interactable" id="cancelLark">取消前往</button>
+            <a href="https://my.feishu.cn/wiki/WOVnwaNCLiD7dfkLMgVcaItvnGg" target="_blank" class="modal-btn btn-confirm interactable" id="confirmLark">继续前往</a>
+        </div>
+    </div>
+
+    <div class="copyright-footer blur-target">©Eric Chiu，网页使用AI辅助生成</div>
+
+    <!-- 共用核心 JS -->
+    <script src="../../js/core.js"></script>
+
+    <!-- 页面专用 JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() { if (typeof pangu !== 'undefined') pangu.spacingPage(); });
+
+        /* Modal Logic */
+        var LarkModal = document.getElementById('LarkModal');
+        var blurTargets = document.querySelectorAll('.blur-target');
+        document.getElementById('btnLark').addEventListener('click', function() {
+            LarkModal.classList.add('active');
+            blurTargets.forEach(function(el) { el.classList.add('blurred'); });
+        });
+        document.getElementById('cancelLark').addEventListener('click', function() {
+            LarkModal.classList.remove('active');
+            blurTargets.forEach(function(el) { el.classList.remove('blurred'); });
+        });
+        document.getElementById('confirmLark').addEventListener('click', function() {
+            LarkModal.classList.remove('active');
+            blurTargets.forEach(function(el) { el.classList.remove('blurred'); });
+        });
+
+        /* Parallax & 3D Frame */
+        var buttons = document.querySelectorAll('.nav-button');
+        var iframeContainer = document.getElementById('iframeContainer');
+        var bdArray = Array.from(buttons).map(function(b) {
+            return { el: b, d: 20 + Math.random() * 10, cx: 0, cy: 0, tx: 0, ty: 0 };
+        });
+        var rx = 0, ry = 0, frX = 0, frY = 0;
+
+        window.addEventListener('mousemove', function(e) {
+            rx = (e.clientX / window.innerWidth - 0.5) * 2;
+            ry = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        // 移动端陀螺仪替代鼠标
+        if (mocabolka.isMobile) {
+            function gyroLoop() {
+                if (mocabolka.hasGyro) {
+                    rx = mocabolka.gyroX;
+                    ry = mocabolka.gyroY;
+                }
+                requestAnimationFrame(gyroLoop);
+            }
+            requestAnimationFrame(gyroLoop);
+        }
+
+        function renderPhysics() {
+            bdArray.forEach(function(b) {
+                b.tx = -rx * b.d;
+                b.ty = -ry * b.d;
+                b.cx += (b.tx - b.cx) * 0.15;
+                b.cy += (b.ty - b.cy) * 0.15;
+                b.el.style.transform = 'translate(' + b.cx + 'px, ' + b.cy + 'px)';
+            });
+            frX += (ry * 5 - frX) * 0.1;
+            frY += (rx * 5 - frY) * 0.1;
+            iframeContainer.style.transform = 'scale(0.75) rotateX(' + frX + 'deg) rotateY(' + frY + 'deg)';
+            iframeContainer.style.boxShadow = (frY * 2) + 'px ' + (frX * 2) + 'px ' + (20 + Math.abs(frX) + Math.abs(frY)) + 'px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)';
+            requestAnimationFrame(renderPhysics);
+        }
+        setTimeout(function() { requestAnimationFrame(renderPhysics); }, 1000);
+    </script>
+</body>
+</html>

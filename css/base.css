@@ -1,0 +1,335 @@
+/* ============================================================
+   mocabolka.world - Base Styles
+   基础样式：CSS 变量、重置、背景、光标、加载动画、响应式
+   新增：View Transition 增强、陀螺仪动画支持、移动端全面优化
+   ============================================================ */
+
+/* ---- CSS 变量 ---- */
+:root {
+    --accent-main: #9ac8e2;
+    --accent-light: #cce5f4;
+    --accent-dark: #7ab0d1;
+    --glass-bg: rgba(10, 15, 20, 0.55);
+    --glass-border: rgba(154, 200, 226, 0.2);
+    --next-btn-color: #4CAF50;
+    --coral: #ff6b6b;
+    --gold: #ffd93d;
+    --mint: #6bcb77;
+    --lav: #b088f9;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---- 全局重置 ---- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    background-color: #000;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: "OPPO Sans 4.0", "OPPO Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #fff;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---- View Transition 增强 —— 跨页面丝滑动画 ---- */
+@view-transition {
+    navigation: auto;
+}
+
+/*
+ * 策略说明：
+ * - root 级别：旧页面淡出 → 新页面淡入，形成柔和的交叉渐变。
+ * - 持久元素（bg, switcher, nav, particles）：
+ *   old 保持可见（opacity:1），new 也直接显示（opacity:1），
+ *   避免在转场中出现"闪烁/重置"的硬切感。
+ *   视觉上背景和导航栏自然接续，仅有内容区淡入淡出。
+ */
+
+/* 旧页面整体：轻微淡出 */
+::view-transition-old(root) {
+    animation: vt-old-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 新页面整体：淡入 */
+::view-transition-new(root) {
+    animation: vt-new-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    mix-blend-mode: normal;
+}
+
+@keyframes vt-old-out {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes vt-new-in {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* 持久化元素：在转场中保持连续，old 和 new 都可见 */
+.bg-wrapper,
+.bg-overlay {
+    view-transition-name: vt-bg;
+}
+.bg-switcher {
+    view-transition-name: vt-switcher;
+}
+.top-nav {
+    view-transition-name: vt-nav;
+}
+#particle-canvas {
+    view-transition-name: vt-particles;
+}
+
+/* old 持久元素保持完全可见（不淡出） */
+::view-transition-old(vt-bg),
+::view-transition-old(vt-switcher),
+::view-transition-old(vt-nav),
+::view-transition-old(vt-particles) {
+    animation: none;
+    opacity: 1;
+}
+
+/* new 持久元素也直接显示（不淡入），实现视觉接续 */
+::view-transition-new(vt-bg),
+::view-transition-new(vt-switcher),
+::view-transition-new(vt-nav),
+::view-transition-new(vt-particles) {
+    animation: none;
+    opacity: 1;
+}
+
+/* ---- 初始加载动画 —— 仅首次访问显示，后续跨页不显示遮罩 ---- */
+#initial-load-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(10, 15, 22, 0.3) 0%, rgba(0, 0, 0, 1) 100%);
+    animation: initialReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 跨页导航时隐藏 overlay（由 JS 控制 .skip-overlay 类） */
+#initial-load-overlay.skip-overlay {
+    animation: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes initialReveal {
+    0%   { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+/* ---- 自定义光标系统 ---- */
+#cursor-dot, #cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    will-change: transform;
+    opacity: 0;
+}
+
+#cursor-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent-main);
+    border-radius: 50%;
+    margin: -3px 0 0 -3px;
+    z-index: 99998;
+}
+
+#cursor-ring {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(154, 200, 226, 0.5);
+    border-radius: 50%;
+    margin: -18px 0 0 -18px;
+    z-index: 99997;
+}
+
+#cursor-dot.hovered {
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    box-shadow: 0 0 15px var(--accent-main);
+    background: #fff;
+}
+
+#cursor-ring.hovered {
+    width: 55px;
+    height: 55px;
+    margin: -27.5px 0 0 -27.5px;
+    background-color: rgba(154, 200, 226, 0.1);
+    border-color: transparent;
+}
+
+/* ---- 背景层 ---- */
+.bg-wrapper {
+    position: fixed;
+    top: -2%;
+    left: -2%;
+    width: 104%;
+    height: 104%;
+    z-index: -2;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.8s ease-in-out;
+}
+
+.bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: rgba(5, 5, 5, 0.5);
+}
+
+/* ---- 粒子画布 ---- */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ---- 入场动画 ---- */
+@keyframes floatIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* ---- 版权声明 ---- */
+.copyright-footer {
+    position: fixed;
+    bottom: calc(20px + var(--safe-bottom));
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 1px;
+    z-index: 50;
+    pointer-events: none;
+}
+
+/* ================================================================
+   响应式 — 移动端全面优化
+   ================================================================ */
+@media (max-width: 768px) {
+    body, html {
+        cursor: auto;
+    }
+    #cursor-dot, #cursor-ring {
+        display: none;
+    }
+    .bg-switcher {
+        top: auto;
+        bottom: calc(20px + var(--safe-bottom));
+        right: 16px;
+    }
+
+    /* 移动端滚动条隐藏但可滚动 */
+    ::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    /* 移动端安全区域适配 */
+    body {
+        padding-top: var(--safe-top);
+        padding-bottom: var(--safe-bottom);
+    }
+
+    .copyright-footer {
+        bottom: calc(12px + var(--safe-bottom));
+        font-size: 0.7rem;
+    }
+
+    /* 移动端 View Transition 加速 — 保持与桌面端一致的策略 */
+    ::view-transition-old(root) {
+        animation: vt-old-out-mobile 0.2s ease forwards;
+    }
+    ::view-transition-new(root) {
+        animation: vt-new-in-mobile 0.2s ease forwards;
+    }
+
+    @keyframes vt-old-out-mobile {
+        0%   { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    @keyframes vt-new-in-mobile {
+        0%   { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    /* 移动端持久元素 — old 和 new 都可见，保证流畅接续 */
+    ::view-transition-old(vt-bg),
+    ::view-transition-old(vt-switcher),
+    ::view-transition-old(vt-nav),
+    ::view-transition-old(vt-particles) {
+        animation: none !important;
+        opacity: 1;
+    }
+    ::view-transition-new(vt-bg),
+    ::view-transition-new(vt-switcher),
+    ::view-transition-new(vt-nav),
+    ::view-transition-new(vt-particles) {
+        animation: none !important;
+        opacity: 1;
+    }
+
+    /* 移动端初始加载加速 */
+    #initial-load-overlay {
+        animation: initialRevealMobile 0.4s ease forwards;
+    }
+
+    @keyframes initialRevealMobile {
+        0%   { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
+}
+
+/* ---- 平板 (768px-1024px) 中间断点 ---- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .bg-switcher {
+        top: auto;
+        bottom: 20px;
+        right: 24px;
+    }
+}
+
+/* ---- 减少动画偏好 ---- */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root),
+    #initial-load-overlay,
+    .node,
+    .game-card,
+    .card-wrapper {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

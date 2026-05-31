@@ -1,0 +1,503 @@
+/* ============================================================
+   mocabolka.world - Component Styles
+   通用组件样式：背景切换器、导航按钮、模态框、Dock、卡片
+   ============================================================ */
+
+/* ---- 背景切换器 ---- */
+.bg-switcher {
+    position: fixed;
+    top: 30px;
+    right: 40px;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    opacity: 1;
+}
+
+/* 仅首次访问时由 JS 触发入场动画 */
+.bg-switcher.animate-in {
+    opacity: 0;
+    animation: floatIn 0.8s 0.5s forwards;
+}
+
+.sw-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: none;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.sw-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--accent-main);
+}
+
+.sw-btn.active {
+    border-color: var(--accent-main);
+    box-shadow: 0 0 10px var(--accent-main);
+}
+
+/* ---- 顶部导航 ---- */
+.top-nav {
+    position: fixed;
+    top: 30px;
+    left: 40px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent-light);
+    text-decoration: none;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(154, 200, 226, 0.1);
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: #fff;
+    transform: translateX(-5px);
+    border-color: var(--accent-main);
+    background: rgba(154, 200, 226, 0.1);
+}
+
+/* ---- 通用模态框（弹窗） ---- */
+.about-modal,
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -45%) scale(0.95);
+    width: 75vw;
+    max-width: 650px;
+    background: rgba(10, 15, 20, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    backdrop-filter: blur(25px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.about-modal.active,
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* 弹窗关闭按钮 */
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--accent-light);
+    font-size: 24px;
+    transition: color 0.3s, transform 0.3s;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: none;
+}
+
+.close-btn:hover {
+    color: #fff;
+    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* 弹窗标题 */
+.modal-title {
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: 500;
+    letter-spacing: 2px;
+}
+
+/* 弹窗描述文本 */
+.modal-desc,
+.bio {
+    font-size: 1rem;
+    color: var(--accent-light);
+    line-height: 1.8;
+    max-width: 80%;
+    font-weight: 300;
+    text-align: center;
+}
+
+/* 弹窗按钮组 */
+.modal-btn-group {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-family: "OPPO Sans 4.0", "OPPO Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 1px;
+    cursor: none;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-cancel {
+    background: rgba(154, 200, 226, 0.03);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancel:hover {
+    background: rgba(154, 200, 226, 0.1);
+    border-color: var(--accent-main);
+    box-shadow: 0 0 15px rgba(154, 200, 226, 0.3);
+}
+
+.btn-confirm {
+    background: rgba(154, 200, 226, 0.15);
+    color: var(--accent-main);
+    border: 1px solid var(--accent-main);
+}
+
+.btn-confirm:hover {
+    background: rgba(154, 200, 226, 0.25);
+    box-shadow: 0 0 20px rgba(154, 200, 226, 0.5);
+    color: #fff;
+}
+
+/* ---- 底部 Dock ---- */
+.bottom-dock {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.toggle-btn {
+    background: rgba(154, 200, 226, 0.03);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(15px);
+    border-radius: 50px;
+    padding: 10px 30px;
+    color: var(--accent-main);
+    font-size: 0.9rem;
+    font-family: "OPPO Sans 4.0", "OPPO Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: none;
+    text-decoration: none;
+}
+
+.toggle-btn:hover {
+    background: rgba(154, 200, 226, 0.15);
+    box-shadow: 0 0 15px rgba(154, 200, 226, 0.4);
+}
+
+.toggle-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.dock-panel {
+    background: rgba(10, 10, 10, 0.6);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(25px);
+    border-radius: 20px;
+    padding: 15px 20px;
+    display: flex;
+    gap: 15px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    max-width: 90vw;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.dock-panel::-webkit-scrollbar {
+    display: none;
+}
+
+.dock-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dock-icon {
+    display: block;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+    cursor: none;
+}
+
+.dock-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.dock-icon:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(154, 200, 226, 0.4);
+}
+
+.dock-icon:hover img {
+    opacity: 1;
+}
+
+/* ---- 玻璃卡片容器（用于内容展示页） ---- */
+.card-wrapper {
+    position: relative;
+    width: 90vw;
+    max-width: 1400px;
+    height: 82vh;
+    margin: 10vh auto 0;
+    z-index: 10;
+    will-change: transform;
+}
+
+.blur-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    backdrop-filter: blur(25px) saturate(150%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+.content-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    padding: 36px 56px;
+    overflow-y: auto;
+}
+
+.content-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content-container::-webkit-scrollbar-thumb {
+    background: rgba(154, 200, 226, 0.3);
+    border-radius: 10px;
+}
+
+/* ---- 通用导航按钮 ---- */
+.nav-button {
+    padding: 12px 35px;
+    background: rgba(154, 200, 226, 0.15);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    color: var(--accent-light);
+    text-decoration: none;
+    font-size: 1rem;
+    font-family: "OPPO Sans 4.0", "OPPO Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 1.5px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    text-align: center;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: none;
+}
+
+.nav-button:hover {
+    background: rgba(154, 200, 226, 0.25);
+    color: #fff;
+    border-color: var(--accent-main);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.next-button {
+    background: rgba(76, 175, 80, 0.25);
+    border-color: rgba(76, 175, 80, 0.4);
+    color: #d4f8d4;
+    font-weight: 500;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.next-button:hover {
+    background: rgba(76, 175, 80, 0.35);
+    border-color: var(--next-btn-color);
+    color: #fff;
+    box-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* ---- 模糊目标（弹窗打开时模糊背景） ---- */
+.blur-target {
+    transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+.blur-target.blurred {
+    filter: blur(10px);
+    opacity: 0.4;
+    pointer-events: none !important;
+}
+
+/* ---- 底部按钮行 ---- */
+.bottom-button-row {
+    position: fixed;
+    bottom: calc(60px + var(--safe-bottom));
+    left: 0;
+    width: 100%;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    z-index: 30;
+    padding: 0 20px;
+}
+
+/* ---- 页面标题通用样式 ---- */
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 300;
+    letter-spacing: 4px;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(154, 200, 226, 0.5);
+    position: relative;
+    padding-bottom: 15px;
+    flex-shrink: 0;
+}
+
+.page-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 35%;
+    width: 30%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-main), transparent);
+}
+
+/* ---- 子页面通用进场动画 ---- */
+@keyframes subPageFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 所有子页面的主内容容器：页面打开时执行淡入动画 */
+.sub-page .main-stage,
+.sub-page .main-container,
+.sub-page .card-wrapper {
+    animation: subPageFadeIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* 按钮/导航的错峰入场 */
+.sub-page .bottom-button-row {
+    animation: subPageFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s both;
+}
+.sub-page .copyright-footer {
+    animation: subPageFadeIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s both;
+}
+
+/* ---- 响应式 ---- */
+@media (max-width: 768px) {
+    .bg-switcher {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+    }
+    .about-modal,
+    .modal {
+        width: 90vw;
+        padding: 30px 20px;
+    }
+    .card-wrapper {
+        width: 94vw;
+        height: 85vh;
+        margin-top: 8vh;
+    }
+    .content-container {
+        padding: 25px 15px;
+    }
+    .page-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+    .bottom-button-row {
+        bottom: 50px;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .nav-button {
+        min-width: 180px;
+        padding: 10px 30px;
+        font-size: 0.9rem;
+    }
+    .copyright-footer {
+        bottom: 15px;
+        font-size: 0.7rem;
+    }
+    .top-nav {
+        top: 20px;
+        left: 20px;
+    }
+}

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>作品展示 - mocabolka.world</title>
+
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+    <link rel="prefetch" href="../">
+
+    <!-- 共用样式 -->
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+
+    <!-- 背景预初始化 -->
+    <script src="../../js/bg-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        /* ---- works/2 专用样式 ---- */
+        .bg-overlay { background: rgba(5, 5, 5, 0.75); }
+
+        .main-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 0;
+            perspective: 1500px;
+        }
+
+        .text-overlay-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+            padding: 70px 20px 0 20px;
+            pointer-events: none;
+        }
+
+        .text-overlay-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+            padding: 0 20px 135px 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0) 100%);
+            pointer-events: none;
+        }
+
+        /* 统一 works 标题样式 */
+        .work-title {
+            font-size: 2.2rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(154, 200, 226, 0.5);
+            line-height: 1.2;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .work-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 35%;
+            width: 30%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-main), transparent);
+        }
+
+        .work-desc {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--accent-light);
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* 3D 网格图片引擎 */
+        .image-grid {
+            display: flex;
+            width: 100%;
+            height: 68vh;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            transform-style: preserve-3d;
+        }
+
+        .image-card-wrapper {
+            position: relative;
+            height: 100%;
+            aspect-ratio: 9 / 16;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            cursor: none;
+            border-radius: 20px;
+        }
+
+        .image-card {
+            width: 100%;
+            height: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            transform-style: preserve-3d;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 18px;
+            transition: transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .image-card-wrapper:hover .image-card img { transform: scale(1.05); }
+
+        .image-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(154, 200, 226, 0.05);
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .image-card-wrapper:hover .image-card::after { opacity: 1; }
+
+        .image-label {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--accent-light);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            z-index: 3;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .image-card-wrapper:hover .image-label {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .bg-switcher { top: auto; bottom: calc(100px + var(--safe-bottom)); right: 12px; }
+            .top-nav { top: calc(16px + var(--safe-top)); left: 12px; }
+            .back-btn { font-size: 0.85rem; padding: 6px 14px; border-radius: 16px; }
+            .back-btn svg { width: 16px; height: 16px; }
+            .text-overlay-top { height: auto; padding-top: 60px; position: relative; }
+            .text-overlay-bottom { height: auto; padding: 20px 16px 80px 16px; position: relative; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); }
+            .work-title { font-size: 1.5rem; letter-spacing: 2px; padding-bottom: 12px; }
+            .work-title::after { left: 30%; width: 40%; }
+            .work-desc { font-size: 0.85rem; padding: 0 10px; }
+            .image-grid { height: 50vh; gap: 0; position: relative; }
+            .image-card-wrapper { display: none; }
+            .image-card-wrapper.active {
+                display: flex;
+                width: 80vw;
+                height: auto;
+                max-height: 100%;
+                aspect-ratio: 9 / 16;
+                cursor: pointer;
+            }
+            /* 移动端滑动手势提示 */
+            .image-grid::after {
+                content: '← 左右滑动查看 →';
+                position: absolute;
+                bottom: -28px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 0.7rem;
+                color: rgba(255,255,255,0.3);
+                letter-spacing: 1px;
+                white-space: nowrap;
+            }
+            .main-container { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        }
+    </style>
+</head>
+<body class="sub-page">
+
+    <div id="initial-load-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <div class="top-nav">
+        <a href="../../" class="back-btn page-link interactable">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>返回主页
+        </a>
+    </div>
+
+    <div class="modal" id="jumpConfirmDialog">
+        <h2 class="modal-title">即将离开本站</h2>
+        <p class="modal-desc" id="jumpConfirmText">接下来的链接将跳转至【微信公众号文章】。<br>是否继续前往？</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn btn-cancel interactable" id="cancelJump">取消前往</button>
+            <button class="modal-btn btn-confirm interactable" id="confirmJump">继续前往</button>
+        </div>
+    </div>
+
+    <div class="main-container blur-target">
+        <div class="text-overlay-top">
+            <h1 class="work-title">微信公众号推文设计制作</h1>
+        </div>
+
+        <div class="image-grid" id="imageWrapper">
+            <div class="image-card-wrapper active interactable" id="imageWrapper1" data-link="https://mp.weixin.qq.com/s/QDNmznyxBrH7NvCu9T1INg" data-title="招新 | 全新 TrySky，全高光亮相。">
+                <div class="image-card">
+                    <img src="https://s1.1ovv.com/2026/03/22/IoAW.jpg" alt="TrySky招新">
+                    <div class="image-label">招新 | 全新 TrySky，全高光亮相。</div>
+                </div>
+            </div>
+
+            <div class="image-card-wrapper active interactable" id="imageWrapper2" data-link="https://mp.weixin.qq.com/s/pbGgMK1BSluvjffNPt7p7A" data-title="活动回顾 | 主题商务礼仪舞会">
+                <div class="image-card">
+                    <img src="https://s1.1ovv.com/2026/03/22/IonV.jpg" alt="商务礼仪舞会">
+                    <div class="image-label">活动回顾 | "才子君仪流商风，曼舞翩然若惊鸿"主题商务礼仪舞会</div>
+                </div>
+            </div>
+
+            <div class="image-card-wrapper active interactable" id="imageWrapper3" data-link="https://mp.weixin.qq.com/s/OzPuLPBFZ-zV65Sjv570fQ" data-title="你行你为 | 汕大自制微电影 与君相逢首映时">
+                <div class="image-card">
+                    <img src="https://s1.1ovv.com/2026/03/22/IoR4.jpg" alt="汕大自制微电影">
+                    <div class="image-label">你行你为 | 汕大自制微电影 与君相逢首映时</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-overlay-bottom">
+            <p class="work-desc">为学校学院、书院、组织贡献推文作品30余篇，展现创意设计与图文排版能力。</p>
+        </div>
+    </div>
+
+    <div class="bottom-button-row blur-target">
+        <a href="../1/" class="nav-button interactable page-link">上一页</a>
+        <a href="../3/" class="nav-button interactable next-button page-link">下一页</a>
+    </div>
+
+    <div class="copyright-footer blur-target">©Eric Chiu，网页使用AI辅助生成</div>
+
+    <!-- 共用核心 JS -->
+    <script src="../../js/core.js"></script>
+
+    <!-- 页面专用 JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof pangu !== 'undefined') pangu.spacingPage();
+            initMobileSlideshow();
+        });
+
+        window.addEventListener('resize', function() {
+            initMobileSlideshow();
+        });
+
+        /* 移动端滑动浏览 */
+        function initMobileSlideshow() {
+            var wrappers = document.querySelectorAll('.image-card-wrapper');
+            if (window.innerWidth <= 768) {
+                wrappers.forEach(function(w) { w.classList.remove('active'); });
+                wrappers[0].classList.add('active');
+                bindSwipe(wrappers);
+            } else {
+                wrappers.forEach(function(w) { w.classList.add('active'); });
+            }
+        }
+
+        function bindSwipe(wrappers) {
+            var grid = document.getElementById('imageWrapper');
+            var idx = 0;
+            var startX = 0, startY = 0;
+
+            grid.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+
+            grid.addEventListener('touchend', function(e) {
+                var dx = e.changedTouches[0].clientX - startX;
+                var dy = e.changedTouches[0].clientY - startY;
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+                    wrappers[idx].classList.remove('active');
+                    if (dx < 0) idx = (idx + 1) % wrappers.length;
+                    else idx = (idx - 1 + wrappers.length) % wrappers.length;
+                    wrappers[idx].classList.add('active');
+                }
+            });
+        }
+
+        /* Wechat Modal Jump Logic */
+        var cLink = '', cTitle = '';
+        var dlg = document.getElementById('jumpConfirmDialog');
+        var txt = document.getElementById('jumpConfirmText');
+        var bt = document.querySelectorAll('.blur-target');
+
+        document.querySelectorAll('.image-card-wrapper').forEach(function(w) {
+            w.addEventListener('click', function() {
+                cLink = w.getAttribute('data-link');
+                cTitle = w.getAttribute('data-title');
+                txt.innerHTML = '接下来的链接将跳转至<br><strong>' + cTitle + '</strong><br>是否继续前往？';
+                dlg.classList.add('active');
+                bt.forEach(function(el) { el.classList.add('blurred'); });
+            });
+        });
+
+        document.getElementById('cancelJump').addEventListener('click', function() {
+            dlg.classList.remove('active');
+            bt.forEach(function(el) { el.classList.remove('blurred'); });
+        });
+
+        document.getElementById('confirmJump').addEventListener('click', function() {
+            if (cLink) window.open(cLink, '_blank');
+            dlg.classList.remove('active');
+            bt.forEach(function(el) { el.classList.remove('blurred'); });
+        });
+
+        /* 3D Cards Physics Engine */
+        var buttons = document.querySelectorAll('.nav-button');
+        var imageCards = document.querySelectorAll('.image-card');
+        var bdArray = Array.from(buttons).map(function(b) {
+            return { el: b, d: 15 + Math.random() * 10, cx: 0, cy: 0, tx: 0, ty: 0 };
+        });
+        var cdArray = Array.from(imageCards).map(function(c) {
+            return { el: c, frX: 0, frY: 0 };
+        });
+        var rx = 0, ry = 0;
+
+        window.addEventListener('mousemove', function(e) {
+            rx = (e.clientX / window.innerWidth - 0.5) * 2;
+            ry = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        // 移动端陀螺仪
+        if (mocabolka.isMobile) {
+            function gyroLoop() {
+                if (mocabolka.hasGyro) {
+                    rx = mocabolka.gyroX;
+                    ry = mocabolka.gyroY;
+                }
+                requestAnimationFrame(gyroLoop);
+            }
+            requestAnimationFrame(gyroLoop);
+        }
+
+        function renderPhysics() {
+            bdArray.forEach(function(b) {
+                b.tx = -rx * b.d;
+                b.ty = -ry * b.d;
+                b.cx += (b.tx - b.cx) * 0.15;
+                b.cy += (b.ty - b.cy) * 0.15;
+                b.el.style.transform = 'translate(' + b.cx + 'px, ' + b.cy + 'px)';
+            });
+            cdArray.forEach(function(c) {
+                c.frX += (-ry * 8 - c.frX) * 0.1;
+                c.frY += (rx * 8 - c.frY) * 0.1;
+                c.el.style.transform = 'rotateX(' + c.frX + 'deg) rotateY(' + c.frY + 'deg)';
+                c.el.style.boxShadow = (c.frY * 2) + 'px ' + (-c.frX * 2) + 'px ' + (15 + Math.abs(c.frX) + Math.abs(c.frY)) + 'px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)';
+            });
+            requestAnimationFrame(renderPhysics);
+        }
+        setTimeout(function() { requestAnimationFrame(renderPhysics); }, 1000);
+    </script>
+</body>
+</html>

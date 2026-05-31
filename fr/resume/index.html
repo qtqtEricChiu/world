@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>个人简历 - mocabolka.world</title>
+
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+    <link rel="prefetch" href="../">
+
+    <!-- 共用样式 -->
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+
+    <!-- 背景预初始化 -->
+    <script src="../../js/bg-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        /* ---- resume 专用样式 ---- */
+        .card-wrapper {
+            max-width: 1400px;
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* PDF Viewer */
+        .pdf-viewer-box {
+            flex-grow: 1;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(154, 200, 226, 0.15);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            cursor: auto;
+        }
+
+        .pdf-viewer-box iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .card-wrapper {
+                width: 94vw;
+                height: 82vh;
+                margin-top: 7vh;
+                border-radius: 16px;
+            }
+            .content-container {
+                padding: 14px 10px;
+            }
+            .pdf-viewer-box {
+                border-radius: 10px;
+            }
+            .top-nav {
+                top: calc(14px + var(--safe-top));
+                left: 10px;
+            }
+            .back-btn { font-size: 0.85rem; padding: 6px 14px; border-radius: 16px; }
+            .back-btn svg { width: 16px; height: 16px; }
+            .copyright-footer {
+                bottom: calc(10px + var(--safe-bottom));
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body class="sub-page">
+
+    <div id="initial-load-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <div class="top-nav">
+        <a href="../../" class="back-btn page-link interactable">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            返回主页
+        </a>
+    </div>
+
+    <div class="card-wrapper" id="parallaxCard">
+        <div class="blur-background"></div>
+        <div class="content-container">
+            <div class="pdf-viewer-box interactable" id="pdfContainer">
+                <iframe src="../../res/pdf/%E9%82%B1%E6%B7%BB%E7%AE%80%E5%8E%86-%E6%96%B0%E5%AA%92%E4%BD%93%E8%BF%90%E8%90%A5%E8%90%A5%E9%94%80%E7%94%A8%E5%B8%82%E7%A0%94%E5%8F%91%E8%A1%8C%E6%8A%95%E6%94%BE%E5%85%AC%E5%85%B3-27%E5%BA%94%E5%B1%8A-3-6%E6%9C%88.pdf" type="application/pdf">
+                    <p>您的浏览器不支持直接在网页中阅读 PDF，请 <a href="../../res/pdf/%E9%82%B1%E6%B7%BB%E7%AE%80%E5%8E%86-%E6%96%B0%E5%AA%92%E4%BD%93%E8%BF%90%E8%90%A5%E8%90%A5%E9%94%80%E7%94%A8%E5%B8%82%E7%A0%94%E5%8F%91%E8%A1%8C%E6%8A%95%E6%94%BE%E5%85%AC%E5%85%B3-27%E5%BA%94%E5%B1%8A-3-6%E6%9C%88.pdf" target="_blank" style="color: var(--accent-main);">点击此处下载阅读</a>。</p>
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="copyright-footer">©Eric Chiu，网页使用AI辅助生成</div>
+
+    <!-- 共用核心 JS -->
+    <script src="../../js/core.js"></script>
+
+    <!-- 页面专用 JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof pangu !== 'undefined') pangu.spacingPage();
+        });
+
+        /* PDF iframe 光标处理 */
+        var pdfContainer = document.getElementById('pdfContainer');
+        pdfContainer.addEventListener('mouseenter', function() {
+            if (mocabolka.cursorDot) mocabolka.cursorDot.style.opacity = '0';
+            if (mocabolka.cursorRing) mocabolka.cursorRing.style.opacity = '0';
+        });
+        pdfContainer.addEventListener('mouseleave', function() {
+            if (mocabolka.cursorDot) mocabolka.cursorDot.style.opacity = '1';
+            if (mocabolka.cursorRing) mocabolka.cursorRing.style.opacity = '1';
+        });
+
+        /* Parallax Animation */
+        var card = document.getElementById('parallaxCard');
+        var cardTargetX = 0, cardTargetY = 0, cardCurrX = 0, cardCurrY = 0;
+        window.addEventListener('mousemove', function(e) {
+            cardTargetX = ((e.clientX / window.innerWidth - 0.5) * 2) * -8;
+            cardTargetY = ((e.clientY / window.innerHeight - 0.5) * 2) * -8;
+        });
+
+        // 移动端陀螺仪
+        if (mocabolka.isMobile) {
+            function gyroLoop() {
+                if (mocabolka.hasGyro) {
+                    cardTargetX = mocabolka.gyroX * -8;
+                    cardTargetY = mocabolka.gyroY * -8;
+                }
+                requestAnimationFrame(gyroLoop);
+            }
+            requestAnimationFrame(gyroLoop);
+        }
+
+        function renderCard() {
+            cardCurrX += (cardTargetX - cardCurrX) * 0.1;
+            cardCurrY += (cardTargetY - cardCurrY) * 0.1;
+            card.style.transform = 'translate(' + cardCurrX + 'px, ' + cardCurrY + 'px)';
+            requestAnimationFrame(renderCard);
+        }
+        requestAnimationFrame(renderCard);
+    </script>
+</body>
+</html>

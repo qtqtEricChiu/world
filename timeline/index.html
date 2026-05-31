@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>游戏经历 - mocabolka.world</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+
+    <script src="../js/bg-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        /* ================================================================
+           游戏经历页面专用样式
+           ================================================================ */
+
+        html {
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        body {
+            overflow-x: hidden;
+            overflow-y: visible;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* ---- 自定义滚动条 ---- */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(154, 200, 226, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(154, 200, 226, 0.4);
+        }
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+        html {
+            scrollbar-color: rgba(154, 200, 226, 0.2) transparent;
+            scrollbar-width: thin;
+        }
+
+        /* bg-wrapper 继承 base.css 的 104% 尺寸确保与其它页面一致 */
+
+        /* ---- 主内容区 ---- */
+        .main-stage {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh;
+            padding: 120px 48px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            transition: transform 0.25s ease-out;
+            will-change: transform;
+            opacity: 0;
+            animation: stageFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .main-stage > * { pointer-events: auto; }
+
+        @keyframes stageFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* page-header 错峰 */
+        .page-header {
+            opacity: 0;
+            animation: stageFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.06s forwards;
+        }
+
+        /* ================================================================
+           PAGE HEADER
+           ================================================================ */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+        .header-icon-block {
+            position: relative;
+            width: 80px; height: 80px;
+            flex-shrink: 0;
+        }
+        .header-icon-block::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--accent-main), transparent, var(--accent-dark));
+            opacity: 0.3;
+            animation: iconGlow 3s ease-in-out infinite;
+        }
+        @keyframes iconGlow {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(1.04); }
+        }
+        .header-icon-inner {
+            position: relative;
+            width: 100%; height: 100%;
+            background: rgba(20, 28, 42, 0.7);
+            border: 1px solid rgba(154, 200, 226, 0.25);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .header-icon-inner svg {
+            width: 42px; height: 42px;
+            stroke: var(--accent-main);
+            fill: none; stroke-width: 1.5;
+        }
+        .header-text-block { display: flex; flex-direction: column; }
+        .header-overline {
+            font-size: 0.7rem; letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent-dark); font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .header-title {
+            font-size: 3.2rem; font-weight: 200;
+            letter-spacing: 8px; color: #fff;
+            line-height: 1; margin-bottom: 8px;
+        }
+        .header-title .accent {
+            font-weight: 500;
+            background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ================================================================
+           经历信息整合板块
+           ================================================================ */
+        .profile-info-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px 36px;
+            width: 100%;
+            max-width: 1400px;
+            margin-bottom: 56px;
+            padding: 20px 32px;
+            background: rgba(15, 20, 30, 0.4);
+            border: 1px solid rgba(154, 200, 226, 0.12);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardFlyIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s forwards;
+        }
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: rgba(220, 230, 245, 0.7);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .profile-info-item .pi-icon {
+            width: 22px; height: 22px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .profile-info-item .pi-icon svg {
+            width: 16px; height: 16px;
+            stroke: var(--accent-dark); fill: none; stroke-width: 1.5;
+        }
+        .profile-info-item .pi-label {
+            font-weight: 500; color: var(--accent-light);
+        }
+        .profile-info-item .pi-value {
+            font-weight: 300; color: rgba(200, 215, 230, 0.6);
+        }
+        .profile-info-divider {
+            width: 1px; height: 16px;
+            background: rgba(154, 200, 226, 0.15);
+            flex-shrink: 0;
+        }
+        .profile-info-item.consumption-note {
+            font-style: italic;
+            color: rgba(200, 215, 230, 0.5);
+            font-weight: 300;
+            white-space: normal;
+            text-align: center;
+            max-width: 380px;
+            line-height: 1.5;
+        }
+
+        /* ================================================================
+           游戏网格
+           ================================================================ */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        /* ================================================================
+           通用卡片
+           ================================================================ */
+        .game-card {
+            position: relative;
+            background: rgba(15, 20, 30, 0.45);
+            border: 1px solid rgba(154, 200, 226, 0.1);
+            border-radius: 18px;
+            padding: 28px 32px;
+            backdrop-filter: blur(15px);
+            transition: border-color 0.4s, background 0.4s, box-shadow 0.4s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: cardFlyIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 85% 0%, rgba(154, 200, 226, 0.05) 0%, transparent 50%);
+            pointer-events: none; border-radius: 18px;
+            transition: opacity 0.4s; z-index: 0;
+        }
+        .game-card:hover::before { opacity: 0; }
+
+        .card-category, .game-entries, .card-desc-popup, .card-shine {
+            position: relative; z-index: 1;
+        }
+
+        .game-card.deep-played {
+            border-color: rgba(154, 200, 226, 0.2);
+            background: rgba(18, 26, 42, 0.5);
+        }
+        .game-card.deep-played::after {
+            content: '';
+            position: absolute; top: 0; right: 40px;
+            width: 60px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(154, 200, 226, 0.5), transparent);
+            z-index: 1;
+        }
+        .game-card.deep-played:hover {
+            border-color: rgba(154, 200, 226, 0.4);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 30px rgba(154, 200, 226, 0.08);
+        }
+
+        .card-shine {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; border-radius: 18px;
+            pointer-events: none; z-index: 2;
+            opacity: 0; transition: opacity 0.3s;
+            background: radial-gradient(circle at var(--shine-x, 50%) var(--shine-y, 50%), rgba(154, 200, 226, 0.12) 0%, transparent 60%);
+        }
+        .game-card:hover .card-shine { opacity: 1; }
+
+        /* 入场延迟 — 从 stage 淡入完成后开始 */
+        .game-card:nth-child(1)  { animation-delay: 0.16s; }
+        .game-card:nth-child(2)  { animation-delay: 0.19s; }
+        .game-card:nth-child(3)  { animation-delay: 0.22s; }
+        .game-card:nth-child(4)  { animation-delay: 0.25s; }
+        .game-card:nth-child(5)  { animation-delay: 0.28s; }
+        .game-card:nth-child(6)  { animation-delay: 0.31s; }
+        .game-card:nth-child(7)  { animation-delay: 0.34s; }
+        .game-card:nth-child(8)  { animation-delay: 0.37s; }
+        .game-card:nth-child(9)  { animation-delay: 0.40s; }
+        .game-card:nth-child(10) { animation-delay: 0.43s; }
+        .game-card:nth-child(11) { animation-delay: 0.46s; }
+        .game-card:nth-child(12) { animation-delay: 0.49s; }
+        .game-card:nth-child(13) { animation-delay: 0.52s; }
+        .game-card:nth-child(14) { animation-delay: 0.55s; }
+        .game-card:nth-child(15) { animation-delay: 0.58s; }
+        .game-card:nth-child(16) { animation-delay: 0.61s; }
+
+        @keyframes cardFlyIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================================================================
+           英文名小字
+           ================================================================ */
+        .en-name {
+            font-size: 0.72em;
+            font-weight: 300;
+            color: rgba(180, 200, 220, 0.5);
+            letter-spacing: 0.3px;
+            margin-left: 4px;
+        }
+
+        /* ================================================================
+           服务器标签
+           ================================================================ */
+        .server-tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+        .server-tag.cn {
+            background: rgba(255, 217, 61, 0.18);
+            border: 1px solid rgba(255, 217, 61, 0.4);
+            color: #ffd93d;
+        }
+        .server-tag.cn-gold {
+            background: linear-gradient(135deg, rgba(255, 217, 61, 0.25), rgba(255, 180, 40, 0.2));
+            border: 1px solid rgba(255, 217, 61, 0.55);
+            color: #ffe066;
+            animation: serverGoldPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes serverGoldPulse {
+            0%, 100% { box-shadow: 0 0 4px rgba(255, 217, 61, 0.15); }
+            50% { box-shadow: 0 0 10px rgba(255, 217, 61, 0.3); }
+        }
+        .server-tag.en {
+            background: rgba(107, 180, 220, 0.15);
+            border: 1px solid rgba(107, 180, 220, 0.35);
+            color: #8bbcd0;
+        }
+        .server-tag.tc {
+            background: rgba(200, 160, 220, 0.15);
+            border: 1px solid rgba(200, 160, 220, 0.3);
+            color: #c8a0dc;
+        }
+        .server-tag.jp {
+            background: rgba(255, 140, 140, 0.15);
+            border: 1px solid rgba(255, 140, 140, 0.3);
+            color: #ff8c8c;
+        }
+        .server-tag.kr {
+            background: rgba(140, 200, 160, 0.15);
+            border: 1px solid rgba(140, 200, 160, 0.3);
+            color: #8cc8a0;
+        }
+        .server-tag.intl {
+            background: rgba(180, 180, 200, 0.15);
+            border: 1px solid rgba(180, 180, 200, 0.3);
+            color: #b4b4c8;
+        }
+        .server-tags-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        /* ================================================================
+           游玩年份标签
+           ================================================================ */
+        .year-tag {
+            font-size: 0.68rem;
+            color: rgba(180, 200, 220, 0.55);
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        /* ================================================================
+           二次元旗舰卡片 — 独占整行 + 内部自动分栏
+           ================================================================ */
+        .game-card.anime-flagship {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 0;
+            padding: 0;
+            overflow: visible;
+            border: 1px solid rgba(176, 136, 249, 0.3);
+            background: rgba(22, 18, 38, 0.5);
+        }
+
+        .game-card.anime-flagship::before {
+            background: radial-gradient(ellipse at 30% 20%, rgba(176, 136, 249, 0.08) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, rgba(154, 200, 226, 0.06) 0%, transparent 50%);
+            border-radius: 18px;
+        }
+
+        .game-card.anime-flagship::after {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 18px;
+            pointer-events: none; z-index: 0;
+            background:
+                linear-gradient(135deg, rgba(176, 136, 249, 0.1) 0%, transparent 50%, rgba(154, 200, 226, 0.08) 100%);
+        }
+
+        .game-card.anime-flagship.deep-played {
+            border-color: rgba(176, 136, 249, 0.35);
+            box-shadow: 0 0 40px rgba(176, 136, 249, 0.08), 0 16px 48px rgba(0,0,0,0.5);
+        }
+
+        .game-card.anime-flagship.deep-played:hover {
+            border-color: rgba(176, 136, 249, 0.55);
+            box-shadow: 0 0 60px rgba(176, 136, 249, 0.15), 0 20px 56px rgba(0,0,0,0.55);
+        }
+
+        /* 左侧品牌栏 */
+        .anime-brand-col {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 20px;
+            background: rgba(176, 136, 249, 0.06);
+            border-right: 1px solid rgba(176, 136, 249, 0.15);
+            text-align: center;
+            gap: 12px;
+            border-radius: 18px 0 0 18px;
+        }
+
+        .anime-brand-icon {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: rgba(176, 136, 249, 0.12);
+            border: 1px solid rgba(176, 136, 249, 0.25);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .anime-brand-icon::before {
+            content: '';
+            position: absolute; inset: -4px; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(176, 136, 249, 0.3), transparent);
+            animation: brandPulse 3s ease-in-out infinite;
+        }
+        @keyframes brandPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .anime-brand-icon svg {
+            width: 28px; height: 28px;
+            stroke: #b088f9; fill: none; stroke-width: 1.5;
+        }
+
+        .anime-brand-label {
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: rgba(176, 136, 249, 0.8);
+        }
+
+        /* 右侧内容区 — 自动分栏 */
+        .anime-game-col {
+            position: relative;
+            z-index: 2;
+            padding: 28px 32px;
+            overflow: visible;
+        }
+
+        .anime-columns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px 32px;
+            width: 100%;
+        }
+
+        .anime-column {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .anime-column .anime-col-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: rgba(176, 136, 249, 0.5);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(176, 136, 249, 0.1);
+        }
+
+        .anime-column .game-entry {
+            padding: 6px 10px;
+            border-radius: 10px;
+            transition: background 0.25s ease;
+            display: flex; align-items: center; gap: 8px;
+            flex-wrap: wrap;
+        }
+        .anime-column .game-entry:hover {
+            background: rgba(176, 136, 249, 0.06);
+        }
+        .anime-column .game-entry .entry-name {
+            font-size: 0.85rem; color: #d0e4f0;
+            font-weight: 400; letter-spacing: 0.5px;
+        }
+        .anime-column .game-entry .entry-hours {
+            font-size: 0.78rem; padding: 3px 9px;
+            border-radius: 10px;
+            background: rgba(176, 136, 249, 0.1);
+            border: 1px solid rgba(176, 136, 249, 0.2);
+            color: #c0b0f0;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        .anime-column .game-entry .entry-hours .num { font-size: 1.05em; }
+        .anime-column .game-entry .entry-hours .unit { font-size: 0.72em; opacity: 0.7; }
+        .anime-column .game-entry .entry-extra {
+            font-size: 0.7rem; color: rgba(176, 136, 249, 0.65);
+            font-weight: 500; padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(176, 136, 249, 0.06);
+            border: 1px solid rgba(176, 136, 249, 0.1);
+            white-space: nowrap;
+        }
+        .anime-column .game-entry.no-hours .entry-name {
+            color: rgba(180, 195, 215, 0.5); font-size: 0.8rem;
+        }
+
+        /* ================================================================
+           主游画中画卡片 (PIP)
+           ================================================================ */
+        .pip-card {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 6px;
+            border: 1px solid rgba(255, 217, 61, 0.3);
+            background-size: cover;
+            background-position: center;
+            min-height: 130px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .pip-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, rgba(10, 8, 20, 0.9) 30%, rgba(10, 8, 20, 0.35) 60%, rgba(10, 8, 20, 0.1) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        .pip-card:hover {
+            border-color: rgba(255, 217, 61, 0.55);
+            box-shadow: 0 0 20px rgba(255, 217, 61, 0.12);
+        }
+        .pip-card-inner {
+            position: relative;
+            z-index: 2;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            min-height: 130px;
+            justify-content: space-between;
+        }
+        .pip-card .pip-top {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .pip-card .pip-game-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pip-card .pip-game-name .role-badge {
+            font-size: 0.62rem;
+            padding: 2px 7px;
+            border-radius: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .pip-card .pip-year {
+            font-size: 0.68rem;
+            color: rgba(200, 200, 240, 0.45);
+            letter-spacing: 0.5px;
+        }
+        .pip-card .pip-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .pip-card .pip-tag {
+            font-size: 0.66rem;
+            color: rgba(255, 217, 61, 0.7);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(255, 217, 61, 0.08);
+            border: 1px solid rgba(255, 217, 61, 0.15);
+        }
+        .pip-card .pip-hours-bottom {
+            position: absolute;
+            right: 12px;
+            bottom: 10px;
+            z-index: 2;
+            font-size: 0.72rem;
+            color: #ffd93d;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: rgba(10, 8, 20, 0.7);
+            padding: 3px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 217, 61, 0.3);
+            display: inline-flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+        .pip-card .pip-hours-bottom .num { font-size: 1.15em; }
+        .pip-card .pip-hours-bottom .unit { font-size: 0.7em; opacity: 0.8; font-weight: 500; }
+
+        /* ================================================================
+           主游 / 副游 标签
+           ================================================================ */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        .role-badge.main-game {
+            background: linear-gradient(135deg, rgba(255, 217, 61, 0.2), rgba(255, 180, 40, 0.15));
+            border: 1px solid rgba(255, 217, 61, 0.4);
+            color: #ffd93d;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        .role-badge.sub-game {
+            background: linear-gradient(135deg, rgba(107, 203, 119, 0.2), rgba(76, 175, 80, 0.15));
+            border: 1px solid rgba(107, 203, 119, 0.35);
+            color: #6bcb77;
+        }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 6px rgba(255, 217, 61, 0.2); }
+            50% { box-shadow: 0 0 16px rgba(255, 217, 61, 0.4); }
+        }
+
+        /* ================================================================
+           分类标签
+           ================================================================ */
+        .card-category {
+            display: inline-flex;
+            align-items: center; gap: 7px;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 1.8px; text-transform: uppercase;
+            color: var(--accent-dark);
+            margin-bottom: 20px;
+        }
+        .card-category::before {
+            content: '';
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--accent-main);
+            box-shadow: 0 0 8px rgba(154, 200, 226, 0.6);
+        }
+
+        /* ================================================================
+           游戏条目行（非二次元卡片用）
+           ================================================================ */
+        .game-entries {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .game-entry {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 14px; border-radius: 12px;
+            transition: all 0.25s ease;
+            position: relative; flex-wrap: wrap;
+        }
+        .game-entry:hover {
+            background: rgba(154, 200, 226, 0.06);
+        }
+        .game-entry .entry-name {
+            font-size: 0.9rem; color: #d0e4f0;
+            font-weight: 400; flex: 1; min-width: 0;
+            letter-spacing: 0.5px;
+        }
+        .entry-desc-always {
+            font-size: 0.78rem; color: rgba(200, 220, 240, 0.6);
+            font-weight: 300; letter-spacing: 0.3px;
+            line-height: 1.5; width: 100%;
+            margin-top: 2px;
+        }
+        .game-entry .entry-hours {
+            display: inline-flex; align-items: baseline; gap: 1px;
+            font-weight: 700; font-size: 0.88rem;
+            color: var(--accent-main); white-space: nowrap;
+            padding: 4px 12px; border-radius: 14px;
+            background: rgba(154, 200, 226, 0.1);
+            border: 1px solid rgba(154, 200, 226, 0.2);
+            transition: all 0.3s ease;
+        }
+        .game-entry:hover .entry-hours {
+            background: rgba(154, 200, 226, 0.18);
+            border-color: rgba(154, 200, 226, 0.4);
+            box-shadow: 0 0 16px rgba(154, 200, 226, 0.15);
+        }
+        .entry-hours .num { font-size: 1.1em; }
+        .entry-hours .unit { font-size: 0.75em; opacity: 0.75; font-weight: 500; }
+        .entry-hours.major {
+            font-size: 0.95rem;
+            background: rgba(154, 200, 226, 0.16);
+            border-color: rgba(154, 200, 226, 0.35);
+            animation: majorGlow 2.5s ease-in-out infinite;
+        }
+        @keyframes majorGlow {
+            0%, 100% { box-shadow: 0 0 8px rgba(154, 200, 226, 0.1); }
+            50% { box-shadow: 0 0 20px rgba(154, 200, 226, 0.25); }
+        }
+        .entry-extra {
+            font-size: 0.75rem; color: var(--accent-dark);
+            font-weight: 500; padding: 3px 10px;
+            border-radius: 10px;
+            background: rgba(154, 200, 226, 0.06);
+            border: 1px solid rgba(154, 200, 226, 0.12);
+            white-space: nowrap;
+        }
+        .game-entry.no-hours .entry-name {
+            color: rgba(200, 215, 230, 0.55);
+            font-size: 0.84rem;
+        }
+        .entry-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        /* ================================================================
+           HOVER 弹出描述浮层 — 使用 fixed 定位避免被裁剪
+           ================================================================ */
+        .card-desc-popup {
+            position: fixed;
+            background: rgba(10, 15, 22, 0.95);
+            border: 1px solid rgba(154, 200, 226, 0.25);
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-size: 0.82rem; line-height: 1.7;
+            color: rgba(210, 225, 240, 0.75);
+            font-weight: 300; letter-spacing: 0.3px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s;
+            pointer-events: none;
+            z-index: 9999;
+            max-width: 480px;
+            min-width: 260px;
+        }
+        .card-desc-popup.active {
+            opacity: 1; visibility: visible;
+        }
+        .card-desc-popup .popup-label {
+            font-size: 0.65rem; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--accent-dark);
+            margin-bottom: 8px; font-weight: 600;
+        }
+        .card-desc-popup .highlight {
+            color: var(--accent-light); font-weight: 500;
+            border-bottom: 1px dotted rgba(154, 200, 226, 0.3);
+        }
+
+        /* 二次元浮层专用色调 */
+        .game-card.anime-flagship ~ .card-desc-popup,
+        .card-desc-popup.anime-popup {
+            border-color: rgba(176, 136, 249, 0.3);
+        }
+        .card-desc-popup.anime-popup .popup-label {
+            color: rgba(176, 136, 249, 0.7);
+        }
+
+        /* ================================================================
+           尾部
+           ================================================================ */
+        .games-footer {
+            margin-top: 60px; text-align: center;
+            width: 100%; max-width: 1400px;
+        }
+        .games-footer .footer-divider {
+            width: 120px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(154, 200, 226, 0.2), transparent);
+            margin: 0 auto 20px;
+        }
+        .games-footer p {
+            font-size: 0.78rem; color: rgba(255,255,255,0.22);
+            letter-spacing: 1px;
+        }
+
+        /* ================================================================
+           响应式
+           ================================================================ */
+        @media (max-width: 768px) {
+            .main-stage {
+                padding: 90px 12px 80px;
+            }
+            .top-nav { top: calc(16px + var(--safe-top)); left: 12px; }
+            .back-btn { font-size: 0.85rem; padding: 6px 14px; border-radius: 16px; }
+            .back-btn svg { width: 16px; height: 16px; }
+            .page-header {
+                flex-direction: column; gap: 16px;
+                text-align: center; margin-bottom: 28px;
+            }
+            .header-title { font-size: 2rem; letter-spacing: 4px; }
+            .games-grid { grid-template-columns: 1fr; gap: 12px; }
+
+            .profile-info-strip {
+                flex-direction: column;
+                gap: 8px;
+                padding: 14px 16px;
+                margin-bottom: 32px;
+                border-radius: 14px;
+            }
+            .profile-info-divider { width: 50px; height: 1px; }
+            .profile-info-item.consumption-note { max-width: 100%; font-size: 0.78rem; }
+
+            .game-card.anime-flagship {
+                grid-column: 1 / -1;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                border-radius: 16px;
+            }
+            .anime-brand-col {
+                flex-direction: row;
+                padding: 16px 20px;
+                border-right: none;
+                border-bottom: 1px solid rgba(176, 136, 249, 0.15);
+                gap: 12px;
+                border-radius: 16px 16px 0 0;
+            }
+            .anime-brand-icon { width: 36px; height: 36px; border-radius: 12px; }
+            .anime-brand-icon svg { width: 20px; height: 20px; }
+            .anime-brand-label { font-size: 0.62rem; letter-spacing: 1.5px; }
+            .anime-game-col { padding: 18px 14px; }
+            .anime-columns { grid-template-columns: 1fr; gap: 12px; }
+            .anime-column .anime-col-title { font-size: 0.6rem; margin-bottom: 6px; }
+
+            .game-card { padding: 18px 14px; border-radius: 16px; }
+            .game-entry { padding: 5px 8px; gap: 6px; }
+            .game-entry .entry-name { font-size: 0.82rem; }
+            .entry-hours { font-size: 0.76rem; padding: 3px 8px; border-radius: 10px; }
+            .card-desc-popup { max-width: 88vw; left: 6vw !important; right: auto !important; font-size: 0.78rem; padding: 14px 16px; }
+            .header-icon-block { width: 54px; height: 54px; }
+            .header-icon-inner svg { width: 32px; height: 32px; }
+
+            .pip-card { min-height: 100px; border-radius: 12px; }
+            .pip-card::before {
+                background: linear-gradient(90deg, rgba(10,8,20,0.88) 50%, rgba(10,8,20,0.25) 80%, rgba(10,8,20,0.08) 100%);
+            }
+            .pip-card .pip-hours-bottom { right: 6px; bottom: 6px; font-size: 0.65rem; padding: 2px 8px; }
+            .pip-card .pip-game-name { font-size: 0.9rem; }
+            .pip-card-inner { padding: 10px 12px; min-height: 100px; }
+
+            .entry-extra { font-size: 0.68rem; padding: 2px 7px; }
+            .server-tag { font-size: 0.58rem; padding: 1px 5px; }
+            .year-tag { font-size: 0.64rem; }
+            .en-name { font-size: 0.68em; }
+        }
+    </style>
+</head>
+<body class="sub-page">
+<div id="initial-load-overlay"></div>
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div class="bg-wrapper" id="mainBg"></div>
+<div class="bg-overlay"></div>
+<canvas id="particle-canvas"></canvas>
+
+<div class="bg-switcher">
+    <div class="sw-btn interactable" onclick="mocabolka.changeBg(0)" style="background-image:url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+    <div class="sw-btn interactable" onclick="mocabolka.changeBg(1)" style="background-image:url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+    <div class="sw-btn interactable" onclick="mocabolka.changeBg(2)" style="background-image:url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+    <div class="sw-btn interactable" onclick="mocabolka.changeBg(3)" style="background-image:url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+</div>
+
+<div class="top-nav">
+    <a href="../" class="back-btn page-link interactable">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        返回主页
+    </a>
+</div>
+
+<!-- ==================== 主内容区 ==================== -->
+<div class="main-stage" id="mainStage">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="header-icon-block">
+            <div class="header-icon-inner">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="2"/>
+                    <path d="M7 9 l5 3 l5 -3"/>
+                    <path d="M7 13 l5 3 l5 -3"/>
+                    <path d="M12 12 v6"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="5" y1="21" x2="5" y2="19"/>
+                    <line x1="19" y1="21" x2="19" y2="19"/>
+                </svg>
+            </div>
+        </div>
+        <div class="header-text-block">
+            <div class="header-overline">Gaming Archive</div>
+            <h1 class="header-title">游戏<span class="accent">经历</span></h1>
+        </div>
+    </div>
+
+    <!-- ====== 经历信息整合板块 ====== -->
+    <div class="profile-info-strip">
+        <div class="profile-info-item">
+            <span class="pi-icon">
+                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </span>
+            <span class="pi-label">Steam</span>
+            <span class="pi-value">8 年</span>
+        </div>
+        <span class="profile-info-divider"></span>
+        <div class="profile-info-item">
+            <span class="pi-icon">
+                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </span>
+            <span class="pi-label">Epic</span>
+            <span class="pi-value">4 年</span>
+        </div>
+        <span class="profile-info-divider"></span>
+        <div class="profile-info-item">
+            <span class="pi-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span class="pi-value">仅统计 2019 年后游玩且总时长超过 10 小时游戏</span>
+        </div>
+        <span class="profile-info-divider"></span>
+        <div class="profile-info-item">
+            <span class="pi-icon">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><line x1="1" y1="12" x2="23" y2="12"/></svg>
+            </span>
+            <span class="pi-label">低氪 / 零氪</span>
+        </div>
+        <span class="profile-info-divider"></span>
+        <div class="profile-info-item consumption-note">
+            注重消费价值，以实体/资产/体验消费为主<br>（购买游戏、IP周边及联名产品、参加线下活动等）
+        </div>
+    </div>
+
+    <!-- 游戏网格 -->
+    <div class="games-grid">
+
+        <!-- ====== 1. 二次元旗舰 ====== -->
+        <div class="game-card deep-played anime-flagship" data-category="二次元">
+            <div class="card-shine"></div>
+            <div class="anime-brand-col">
+                <div class="anime-brand-icon">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9"/>
+                    </svg>
+                </div>
+                <div class="anime-brand-label">二次元</div>
+            </div>
+            <div class="anime-game-col">
+                <div class="anime-columns">
+                    <!-- 第一栏：主游 -->
+                    <div class="anime-column">
+                        <div class="anime-col-title">主游</div>
+                        <!-- 绝区零画中画 -->
+                        <div class="pip-card" style="background-image: url('../res/img/png/bg.zzz.png');">
+                            <div class="pip-card-inner">
+                                <div class="pip-top">
+                                    <div class="pip-game-name">
+                                        绝区零
+                                        <span class="role-badge main-game">主游</span>
+                                    </div>
+                                    <div class="pip-year">2024起 · 开服玩家</div>
+                                    <div class="pip-tags">
+                                        <span class="pip-tag">传奇绳匠</span>
+                                        <span class="pip-tag">线下Fes经历</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="pip-hours-bottom"><span class="num">700+</span><span class="unit">天</span></span>
+                        </div>
+                        <!-- 无限暖暖画中画 -->
+                        <div class="pip-card" style="background-image: url('../res/img/png/bg.infnikki.png');">
+                            <div class="pip-card-inner">
+                                <div class="pip-top">
+                                    <div class="pip-game-name">
+                                        无限暖暖
+                                        <span class="role-badge main-game">主游</span>
+                                    </div>
+                                    <div class="pip-year">2024起 · 开服玩家</div>
+                                    <div class="pip-tags">
+                                        <span class="pip-tag">99级</span>
+                                        <span class="pip-tag">充值 500+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="pip-hours-bottom"><span class="num">900+</span><span class="unit">h</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 第二栏：深度体验 -->
+                    <div class="anime-column">
+                        <div class="anime-col-title">深度体验</div>
+                        <div class="game-entry">
+                            <span class="entry-name">崩坏：星穹铁道</span>
+                            <span class="year-tag">2024-25</span>
+                            <span class="entry-hours"><span class="num">200+</span><span class="unit">天</span></span>
+                        </div>
+                        <div class="game-entry">
+                            <span class="entry-name">双生视界</span>
+                            <span class="year-tag">2019-20</span>
+                            <span class="entry-hours"><span class="num">150+</span><span class="unit">h</span></span>
+                            <span class="entry-extra">开服玩家</span>
+                        </div>
+                        <div class="game-entry">
+                            <span class="entry-name">明日方舟：终末地</span>
+                            <span class="year-tag">2026</span>
+                            <span class="entry-hours"><span class="num">100+</span><span class="unit">h</span></span>
+                            <span class="entry-extra">开服玩家</span>
+                        </div>
+                    </div>
+
+                    <!-- 第三栏：更多二次元 -->
+                    <div class="anime-column">
+                        <div class="anime-col-title">更多</div>
+                        <div class="game-entry no-hours">
+                            <span class="entry-name">崩坏3</span>
+                        </div>
+                        <div class="game-entry no-hours">
+                            <span class="entry-name">公主连结 <small class="en-name">Princess Connect</small></span>
+                            <span class="server-tag tc">TC</span>
+                        </div>
+                        <div class="game-entry no-hours">
+                            <span class="entry-name">洛克王国：世界</span>
+                            <span class="entry-extra">二测玩家</span>
+                        </div>
+                        <div class="game-entry no-hours">
+                            <span class="entry-name">胜利女神：新的希望 <small class="en-name">Goddess of Victory: Nikke</small></span>
+                            <span class="server-tag en">EN</span>
+                        </div>
+                        <div class="game-entry no-hours">
+                            <span class="entry-name">蔚蓝档案 <small class="en-name">Blue Archive</small></span>
+                            <span class="server-tag cn">CN</span>
+                            <span class="entry-extra">开服玩家</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 二次元浮层 — 独立于卡片之外 -->
+        <div class="card-desc-popup anime-popup" id="popup-anime">
+            <div class="popup-label">动作 / 策略 / 养成 / RPG / 换装冒险</div>
+            涵盖都市幻想动作、开放世界换装、科幻回合制、策略塔防、经典 IP 新作等多种二次元题材；绝区零达到 <span class="highlight">传奇绳匠</span> 最高段位，曾参加线下 Fes 活动；无限暖暖为暖暖系列第五代 PC / 移动双端作品。
+        </div>
+
+        <!-- ====== 2. 沙盒探索 ====== -->
+        <div class="game-card deep-played" data-category="沙盒探索">
+            <div class="card-shine"></div>
+            <div class="card-category">沙盒探索</div>
+            <div class="game-entries">
+                <div class="game-entry">
+                    <span class="entry-name">Minecraft</span>
+                    <span class="entry-hours major"><span class="num">2000+</span><span class="unit">h</span></span>
+                    <span class="year-tag">2015起</span>
+                    <div class="entry-desc-always">涵盖 Pocket Edition、Bedrock Edition、Java Edition 三平台；网易中国版双端内测玩家。主要在大型多人在线服务器游玩：Hypixel（含中国服）、梦世界、花雨庭等小游戏集合服，以及梦之边缘V（神魔战域/神秘海岛）RPG服重度体验。</div>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-sandbox">
+                <div class="popup-label">开放世界 / 生存建造 / 探索</div>
+                多平台深度体验，涵盖 <span class="highlight">Hypixel</span>、梦世界、花雨庭等知名小游戏集合服，以及梦之边缘V等重度 RPG 服务器；同时也是网易中国版双端内测玩家。
+            </div>
+        </div>
+
+        <!-- ====== 3. 赛车竞速 ====== -->
+        <div class="game-card deep-played" data-category="赛车竞速">
+            <div class="card-shine"></div>
+            <div class="card-category">赛车竞速</div>
+            <div class="game-entries">
+                <div class="game-entry">
+                    <span class="entry-name">极限竞速：地平线4 <small class="en-name">Forza Horizon 4</small></span>
+                    <span class="year-tag">2022-24</span>
+                    <span class="entry-hours major"><span class="num">150+</span><span class="unit">h</span></span>
+                </div>
+                <div class="game-entry">
+                    <span class="entry-name">飙酷车神：轰鸣盛典 <small class="en-name">The Crew Motorfest</small></span>
+                    <span class="role-badge sub-game">副游</span>
+                    <span class="year-tag">2026起</span>
+                    <span class="entry-hours"><span class="num">50+</span><span class="unit">h</span></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">极限竞速：地平线5 <small class="en-name">Forza Horizon 5</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">飙酷车神2 <small class="en-name">The Crew 2</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">F1车队经理24 <small class="en-name">F1 Manager 2024</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">QQ飞车手游</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">极品飞车：集结</span>
+                    <span class="entry-extra">内测玩家</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">狂野飙车9 <small class="en-name">Asphalt 9</small></span>
+                    <span class="server-tag en">EN</span>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-racing">
+                <div class="popup-label">拟真竞速 / 开放世界驾驶 / 街机</div>
+                <span class="highlight">Forza Horizon 4</span> 为主要深度体验作品，The Crew Motorfest 为当前副游。涵盖拟真驾驶、街机竞速与车队管理等多种赛车游戏类型。
+            </div>
+        </div>
+
+        <!-- ====== 4. 模拟经营 ====== -->
+        <div class="game-card deep-played" data-category="模拟经营">
+            <div class="card-shine"></div>
+            <div class="card-category">模拟经营</div>
+            <div class="game-entries">
+                <div class="game-entry">
+                    <span class="entry-name">都市：天际线 <small class="en-name">Cities: Skylines</small></span>
+                    <span class="year-tag">2023起</span>
+                    <span class="entry-hours major"><span class="num">300+</span><span class="unit">h</span></span>
+                </div>
+                <div class="game-entry">
+                    <span class="entry-name">模拟城市：我是市长 <small class="en-name">SimCity BuildIt</small></span>
+                    <span class="year-tag">2015-24</span>
+                    <span class="entry-hours"><span class="num">200+</span><span class="unit">h</span></span>
+                    <span class="server-tag en">EN</span>
+                </div>
+                <div class="game-entry">
+                    <span class="entry-name">奥比岛：梦想国度</span>
+                    <span class="year-tag">2022</span>
+                    <span class="entry-hours"><span class="num">100+</span><span class="unit">h</span></span>
+                    <span class="entry-extra">开服玩家</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">过山车之星 <small class="en-name">Planet Coaster</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">星露谷物语 <small class="en-name">Stardew Valley</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">双点系列 <small class="en-name">Two Point Series</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">Recipe for Disaster</span>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-sim">
+                <div class="popup-label">城市建设 / 模拟经营 / 沙盒管理</div>
+                <span class="highlight">都市：天际线</span> 与 <span class="highlight">SimCity BuildIt</span> 为主要深度体验作品，涵盖城市建设、主题乐园经营、农场模拟、餐厅管理等多元模拟题材。
+            </div>
+        </div>
+
+        <!-- ====== 5. 派对游戏 ====== -->
+        <div class="game-card deep-played" data-category="派对游戏">
+            <div class="card-shine"></div>
+            <div class="card-category">派对游戏</div>
+            <div class="game-entries">
+                <div class="game-entry">
+                    <span class="entry-name">糖豆人 <small class="en-name">Fall Guys</small></span>
+                    <span class="year-tag">2022-23</span>
+                    <span class="entry-hours major"><span class="num">100+</span><span class="unit">h</span></span>
+                    <span class="entry-extra">原教旨淘汰赛玩家</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">超级鸡马 <small class="en-name">Ultimate Chicken Horse</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">蛋仔派对</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">元梦之星</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">双人成行 <small class="en-name">It Takes Two</small></span>
+                    <span class="entry-extra">二刷</span>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-party">
+                <div class="popup-label">多人派对 / 合作闯关 / 竞技淘汰</div>
+                以 <span class="highlight">糖豆人</span> 为主要深度体验，偏好淘汰赛制与好友联机合作类游戏。
+            </div>
+        </div>
+
+        <!-- ====== 6. 音乐舞蹈 ====== -->
+        <div class="game-card deep-played" data-category="音乐舞蹈">
+            <div class="card-shine"></div>
+            <div class="card-category">音乐舞蹈</div>
+            <div class="game-entries">
+                <div class="game-entry">
+                    <span class="entry-name">BanG Dream! 少女乐团派对</span>
+                    <span class="year-tag">2019-23</span>
+                    <span class="entry-hours major"><span class="num">600+</span><span class="unit">h</span></span>
+                    <span class="entry-extra">开服玩家</span>
+                    <div class="entry-meta-row">
+                        <div class="server-tags-row">
+                            <span class="server-tag cn-gold">CN</span>
+                            <span class="server-tag en">EN</span>
+                            <span class="server-tag tc">TC</span>
+                            <span class="server-tag jp">JP</span>
+                            <span class="server-tag kr">KR</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">节奏大师</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">Cytus II</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">跳舞的线</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">喵斯快跑 <small class="en-name">Muse Dash</small></span>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-music">
+                <div class="popup-label">音游 / 节奏 / 下落式 &amp; 无轨</div>
+                <span class="highlight">BanG Dream!</span> 为重度体验核心，五服全勤开服玩家；涵盖下落式、无轨式等多种音游玩法。
+            </div>
+        </div>
+
+        <!-- ====== 7. 射击 ====== -->
+        <div class="game-card" data-category="射击">
+            <div class="card-shine"></div>
+            <div class="card-category">射击</div>
+            <div class="game-entries">
+                <div class="game-entry">
+                    <span class="entry-name">使命召唤手游 <small class="en-name">Call of Duty Mobile</small></span>
+                    <span class="year-tag">2020-21</span>
+                    <span class="entry-hours"><span class="num">100+</span><span class="unit">h</span></span>
+                    <span class="entry-extra">开服玩家</span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">无畏契约 <small class="en-name">VALORANT</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">终极角逐 <small class="en-name">THE FINALS</small></span>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-shooter">
+                <div class="popup-label">FPS / 战术射击 / 竞技</div>
+                涵盖移动端与 PC 端射击体验，以 <span class="highlight">使命召唤手游</span> 为主要时长作品。
+            </div>
+        </div>
+
+        <!-- ====== 8. 休闲益智 ====== -->
+        <div class="game-card" data-category="休闲益智">
+            <div class="card-shine"></div>
+            <div class="card-category">休闲益智</div>
+            <div class="game-entries">
+                <div class="game-entry no-hours">
+                    <span class="entry-name">愤怒的小鸟2 <small class="en-name">Angry Birds 2</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">捣蛋猪 <small class="en-name">Bad Piggies</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">沙威玛传奇 <small class="en-name">Shawarma Legend</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">地铁跑酷 <small class="en-name">Subway Surfers</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">模拟地铁 <small class="en-name">Mini Metro</small></span>
+                </div>
+                <div class="game-entry no-hours">
+                    <span class="entry-name">Mini Motorways</span>
+                </div>
+            </div>
+            <div class="card-desc-popup" id="popup-casual">
+                <div class="popup-label">休闲 / 益智 / 跑酷 / 策略</div>
+                涵盖经典物理益智、跑酷、模拟规划等轻松向游戏类型。
+            </div>
+        </div>
+
+    </div><!-- /.games-grid -->
+
+</div><!-- /.main-stage -->
+
+<div class="copyright-footer">©Eric Chiu，网页使用AI辅助生成</div>
+
+<script src="../js/core.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof pangu !== 'undefined' && pangu.spacingPageElement) {
+        pangu.spacingPageElement(document.body);
+    }
+
+    /* ================================================================
+       main-stage 整体随光标/陀螺仪轻微晃动
+       ================================================================ */
+    const mainStage = document.getElementById('mainStage');
+    let stageMoveTimeout;
+
+    function applyStageMove(ratioX, ratioY) {
+        if (!mainStage) return;
+        const moveX = ratioX * 10;
+        const moveY = ratioY * 10;
+        mainStage.style.transform = 'translate(' + moveX + 'px, ' + moveY + 'px)';
+        clearTimeout(stageMoveTimeout);
+        stageMoveTimeout = setTimeout(function() {
+            mainStage.style.transform = 'translate(0px, 0px)';
+        }, 2000);
+    }
+
+    document.addEventListener('mousemove', function(e) {
+        const ratioX = (e.clientX / window.innerWidth) - 0.5;
+        const ratioY = (e.clientY / window.innerHeight) - 0.5;
+        applyStageMove(ratioX, ratioY);
+    });
+
+    // 移动端陀螺仪替代
+    if (mocabolka.isMobile) {
+        function gyroStageLoop() {
+            if (mocabolka.hasGyro) {
+                applyStageMove(mocabolka.gyroX, mocabolka.gyroY);
+            }
+            requestAnimationFrame(gyroStageLoop);
+        }
+        requestAnimationFrame(gyroStageLoop);
+    }
+
+    /* ================================================================
+       卡片光泽追踪
+       ================================================================ */
+    const cards = document.querySelectorAll('.game-card');
+
+    cards.forEach(card => {
+        card.addEventListener('mousemove', function(e) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const shine = card.querySelector('.card-shine');
+            if (shine) {
+                const px = (x / rect.width) * 100;
+                const py = (y / rect.height) * 100;
+                shine.style.setProperty('--shine-x', px + '%');
+                shine.style.setProperty('--shine-y', py + '%');
+            }
+        });
+    });
+
+    /* ================================================================
+       Hover 浮层 — 使用 fixed 定位，统一处理
+       ================================================================ */
+    const animeFlagship = document.querySelector('.anime-flagship');
+    const popupAnime = document.getElementById('popup-anime');
+
+    if (animeFlagship && popupAnime) {
+        // anime popup 已在 body 中，不需要移动
+        animeFlagship.addEventListener('mouseenter', function() {
+            popupAnime.classList.add('active');
+        });
+        animeFlagship.addEventListener('mouseleave', function() {
+            popupAnime.classList.remove('active');
+        });
+        animeFlagship.addEventListener('mousemove', function(e) {
+            const cardRect = animeFlagship.getBoundingClientRect();
+            const popupW = popupAnime.offsetWidth;
+            const popupH = popupAnime.offsetHeight;
+
+            let left = e.clientX - popupW / 2;
+            let top = cardRect.top - popupH - 10;
+
+            if (left < 20) left = 20;
+            if (left + popupW > window.innerWidth - 20) left = window.innerWidth - popupW - 20;
+            if (top < 20) top = cardRect.bottom + 10;
+
+            popupAnime.style.left = left + 'px';
+            popupAnime.style.top = top + 'px';
+        });
+    }
+
+    /* 其他卡片的浮层 — popup 现在内嵌在卡片内，先搬到 body */
+    cards.forEach(card => {
+        if (card === animeFlagship) return;
+        const popup = card.querySelector('.card-desc-popup');
+        if (!popup) return;
+
+        // 搬到 body 层级避免被 overflow 裁剪
+        if (popup.parentElement !== document.body) {
+            document.body.appendChild(popup);
+        }
+
+        card.addEventListener('mouseenter', function() {
+            popup.classList.add('active');
+        });
+        card.addEventListener('mouseleave', function() {
+            popup.classList.remove('active');
+        });
+        card.addEventListener('mousemove', function(e) {
+            const cardRect = card.getBoundingClientRect();
+            const popupW = popup.offsetWidth;
+            const popupH = popup.offsetHeight;
+
+            let left = e.clientX - popupW / 2;
+            let top = cardRect.top - popupH - 10;
+
+            if (left < 20) left = 20;
+            if (left + popupW > window.innerWidth - 20) left = window.innerWidth - popupW - 20;
+            if (top < 20) top = cardRect.bottom + 10;
+
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+        });
+    });
+});
+</script>
+</body>
+</html>

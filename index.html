@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>mocabolka.world</title>
+
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/qtqtEricChiu/blog/refs/heads/main/resources/images/base/favicon.ico">
+    <link rel="prefetch" href="timeline/">
+    <link rel="prefetch" href="https://qtqtericchiu.github.io/blog/">
+
+    <!-- 共用样式 -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <!-- 背景预初始化（防止闪烁） -->
+    <script src="js/bg-init.js"></script>
+    <!-- pangu 中英文间距 -->
+    <script src="https://cdn.jsdelivr.net/gh/qtqtEricChiu/world@main/js/pangu.js"></script>
+
+    <style>
+        /* ---- 主页专用样式 ---- */
+        .entry-points {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            transition: filter 0.4s ease, opacity 0.4s ease;
+        }
+        .entry-points.blurred {
+            filter: blur(8px);
+            opacity: 0;
+            pointer-events: none !important;
+        }
+
+        .node {
+            position: absolute;
+            padding: 15px 30px;
+            background: rgba(154, 200, 226, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            color: var(--accent-light);
+            text-decoration: none;
+            font-weight: 300;
+            letter-spacing: 2px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            opacity: 1;
+            transition: box-shadow 0.4s, border-color 0.4s, color 0.4s;
+            will-change: transform;
+            transform: translate(-50%, -50%);
+        }
+
+        .node::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 30px;
+            box-shadow: inset 0 0 20px rgba(154, 200, 226, 0);
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .node:hover {
+            color: #fff;
+            border-color: var(--accent-main);
+            box-shadow: 0 0 25px rgba(154, 200, 226, 0.25);
+            text-shadow: 0 0 10px var(--accent-main);
+        }
+
+        .node:hover::before {
+            box-shadow: inset 0 0 20px rgba(154, 200, 226, 0.2);
+        }
+
+        .node:nth-child(1) { top: 20%; left: 20%; }
+        .node:nth-child(2) { top: 75%; left: 15%; }
+        .node:nth-child(3) { top: 50%; left: 50%; font-size: 1.2rem; padding: 20px 40px; }
+        .node:nth-child(4) { top: 25%; left: 80%; }
+        .node:nth-child(5) { top: 80%; left: 85%; }
+
+        /* 关于我弹窗特有 */
+        .about-modal#aboutModal {
+            width: 75vw;
+            height: 75vh;
+            max-width: 1000px;
+            max-height: 700px;
+            padding: 40px;
+        }
+
+        #blogModal, #leaveSiteModal, #qrModal {
+            height: auto;
+            max-height: 60vh;
+            max-width: 650px;
+            padding: 40px 30px;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 2px solid var(--accent-main);
+            padding: 5px;
+            box-shadow: 0 0 30px rgba(154, 200, 226, 0.3);
+            object-fit: cover;
+        }
+
+        .username {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: 2px;
+        }
+
+        .bio {
+            text-align: center;
+            max-width: 80%;
+        }
+
+        @media (max-width: 768px) {
+            .node {
+                padding: 14px 24px;
+                font-size: 0.95rem;
+                letter-spacing: 1.5px;
+                border-radius: 24px;
+            }
+            .node:nth-child(1) { top: 14%; left: 50%; transform: translate(-50%, -50%); }
+            .node:nth-child(2) { top: 30%; left: 50%; transform: translate(-50%, -50%); }
+            .node:nth-child(3) { top: 46%; left: 50%; transform: translate(-50%, -50%); font-size: 1.05rem; padding: 16px 32px; }
+            .node:nth-child(4) { top: 62%; left: 50%; transform: translate(-50%, -50%); }
+            .node:nth-child(5) { top: 78%; left: 50%; transform: translate(-50%, -50%); }
+            .about-modal#aboutModal {
+                width: 92vw;
+                height: auto;
+                min-height: 55vh;
+                max-height: 80vh;
+                padding: 24px 16px;
+            }
+            #blogModal, #leaveSiteModal, #qrModal {
+                padding: 28px 18px;
+            }
+            .avatar {
+                width: 90px;
+                height: 90px;
+                margin-bottom: 14px;
+            }
+            .username {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="home-page">
+
+    <div id="initial-load-overlay"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <div class="bg-wrapper" id="mainBg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="bg-switcher">
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(0)" style="background-image: url('https://s1.1ovv.com/2026/03/21/Ix6I.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(1)" style="background-image: url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(2)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
+        <div class="sw-btn interactable" onclick="mocabolka.changeBg(3)" style="background-image: url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <div class="entry-points" id="entryPoints">
+        <a href="works/1/" class="node page-link interactable">作品展示</a>
+        <div id="btn-blog" class="node interactable">个人博客</div>
+        <div id="btn-about" class="node interactable">关于我</div>
+        <a href="timeline/" class="node page-link interactable">游戏经历</a>
+        <a href="contact.html" class="node page-link interactable">早期经历</a>
+    </div>
+
+    <!-- 关于我弹窗 -->
+    <div class="about-modal" id="aboutModal">
+        <button class="close-btn interactable" id="closeAboutBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <img src="https://s1.1ovv.com/2026/03/22/I5SS.md.png" alt="Avatar" class="avatar">
+        <h1 class="username">Eric Chiu</h1>
+        <p class="bio" style="text-align: center;">您好，这里是Eric Chiu。<br>本站使用 Gemini 3.1 Pro 及 元宝DeepSeek 辅助生成。<br>全新一代主页使用 CodeBuddy 进行维护。</p>
+        <a href="fr/resume/" class="toggle-btn page-link interactable" style="margin-top: 25px; padding: 12px 35px; border-color: var(--accent-main); color: #fff;">个人简历</a>
+    </div>
+
+    <!-- 博客提示弹窗 -->
+    <div class="about-modal" id="blogModal">
+        <h2 style="margin-bottom: 20px; font-weight: 500; letter-spacing: 2px;">温馨提示</h2>
+        <p class="bio">因为本地系统重装导致无法重新构建，个人博客已于2023年前后停止更新。里面的内容可能并非最新，且不保证有效。3年前的博客内容亦不代表本人当前的观点和立场。<br><br>博客基于 Hexo 及 Nexmoe 框架构建，并基于个人知识对部分源代码进行了改动。</p>
+        <div style="margin-top: 35px; display: flex; gap: 20px; width: 100%; justify-content: center;">
+            <button class="toggle-btn interactable" id="cancelBlogBtn" style="color: #fff; border-color: rgba(255,255,255,0.2);">取消前往</button>
+            <a href="https://qtqtericchiu.github.io/blog/" class="toggle-btn page-link interactable" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">继续前往</a>
+        </div>
+    </div>
+
+    <!-- 离开站点提示弹窗 -->
+    <div class="about-modal" id="leaveSiteModal">
+        <h2 style="margin-bottom: 20px; font-weight: 500; letter-spacing: 2px;">温馨提示</h2>
+        <p class="bio" style="text-align: center;">您即将离开本站，前往外部链接。<br>请注意您的账号和财产安全。</p>
+        <div style="margin-top: 35px; display: flex; gap: 20px; width: 100%; justify-content: center;">
+            <button class="toggle-btn interactable" id="cancelLeaveBtn" style="color: #fff; border-color: rgba(255,255,255,0.2);">取消前往</button>
+            <a href="#" id="confirmLeaveBtn" target="_blank" class="toggle-btn interactable" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">继续前往</a>
+        </div>
+    </div>
+
+    <!-- 视频号二维码弹窗 -->
+    <div class="about-modal" id="qrModal">
+        <button class="close-btn interactable" id="closeQrBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h2 style="margin-bottom: 20px; font-weight: 500; letter-spacing: 2px;">视频号</h2>
+        <img src="https://s1.1ovv.com/2026/03/24/IOHJ.jpg" alt="视频号QR" style="width: 200px; height: auto; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <p class="bio" style="text-align: center;">请使用微信扫码进入视频号</p>
+    </div>
+
+    <!-- 底部 Dock -->
+    <div class="bottom-dock">
+        <div class="dock-panel" id="dockPanel">
+            <a href="#" class="dock-icon interactable" id="dock-red"><img src="res/img/svg/red.svg" alt="小红书"></a>
+            <a href="#" class="dock-icon interactable" id="dock-wxc"><img src="res/img/svg/wxc.svg" alt="视频号"></a>
+            <a href="#" class="dock-icon interactable" id="dock-ka"><img src="res/img/svg/ka.svg" alt="酷安"></a>
+            <a href="#" class="dock-icon interactable" id="dock-gh"><img src="res/img/svg/gh.svg" alt="GitHub"></a>
+        </div>
+        <button class="toggle-btn interactable" id="toggleBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Link Me
+        </button>
+        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.3); letter-spacing: 1px; margin-top: 5px;">©Eric Chiu，网页使用AI辅助生成</div>
+    </div>
+
+    <!-- 共用核心 JS -->
+    <script src="js/core.js"></script>
+
+    <!-- 主页专用 JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof pangu !== 'undefined') pangu.spacingPage();
+        });
+
+        /* ---- 节点浮动动画 (鼠标 + 陀螺仪) ---- */
+        var nodes = document.querySelectorAll('.node');
+        var mouseRatioX = 0, mouseRatioY = 0;
+
+        window.addEventListener('mousemove', function(e) {
+            mouseRatioX = (e.clientX / window.innerWidth - 0.5) * 2;
+            mouseRatioY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        // 陀螺仪接管（移动端）
+        function updateFromGyro() {
+            if (mocabolka.hasGyro) {
+                mouseRatioX = mocabolka.gyroX;
+                mouseRatioY = mocabolka.gyroY;
+            }
+            requestAnimationFrame(updateFromGyro);
+        }
+        if (mocabolka.isMobile) {
+            requestAnimationFrame(updateFromGyro);
+        }
+
+        var nodeData = Array.from(nodes).map(function(node, i) {
+            return {
+                el: node,
+                depth: 15 + (i % 3) * 10,
+                currX: 0, currY: 0,
+                targetX: 0, targetY: 0,
+                currScale: 1, targetScale: 1
+            };
+        });
+
+        function renderNodes() {
+            nodeData.forEach(function(nd) {
+                nd.targetX = -mouseRatioX * nd.depth;
+                nd.targetY = -mouseRatioY * nd.depth;
+                nd.targetScale = nd.el.matches(':hover') ? 1.05 : 1;
+                nd.currX += (nd.targetX - nd.currX) * 0.15;
+                nd.currY += (nd.targetY - nd.currY) * 0.15;
+                nd.currScale += (nd.targetScale - nd.currScale) * 0.2;
+                nd.el.style.transform = 'translate(calc(-50% + ' + nd.currX + 'px), calc(-50% + ' + nd.currY + 'px)) scale(' + nd.currScale + ')';
+            });
+            requestAnimationFrame(renderNodes);
+        }
+        setTimeout(function() { requestAnimationFrame(renderNodes); }, 1000);
+
+        /* ---- 弹窗交互 ---- */
+        var entryPoints = document.getElementById('entryPoints');
+        var aboutModal = document.getElementById('aboutModal');
+        var blogModal = document.getElementById('blogModal');
+        var leaveSiteModal = document.getElementById('leaveSiteModal');
+        var confirmLeaveBtn = document.getElementById('confirmLeaveBtn');
+        var qrModal = document.getElementById('qrModal');
+
+        document.getElementById('btn-about').addEventListener('click', function() {
+            aboutModal.classList.add('active');
+            entryPoints.classList.add('blurred');
+            mocabolka.setDockState(true);
+        });
+
+        document.getElementById('closeAboutBtn').addEventListener('click', function() {
+            aboutModal.classList.remove('active');
+            entryPoints.classList.remove('blurred');
+            mocabolka.setDockState(false);
+        });
+
+        document.getElementById('btn-blog').addEventListener('click', function() {
+            blogModal.classList.add('active');
+            entryPoints.classList.add('blurred');
+        });
+
+        document.getElementById('cancelBlogBtn').addEventListener('click', function() {
+            blogModal.classList.remove('active');
+            entryPoints.classList.remove('blurred');
+        });
+
+        /* ---- 外部链接跳转确认 ---- */
+        function openLeaveSite(url) {
+            if (leaveSiteModal && confirmLeaveBtn) {
+                leaveSiteModal.classList.add('active');
+                entryPoints.classList.add('blurred');
+                confirmLeaveBtn.href = url;
+                mocabolka.setDockState(false);
+            }
+        }
+
+        document.getElementById('dock-red').addEventListener('click', function(e) {
+            e.preventDefault();
+            openLeaveSite('https://xhslink.com/m/135tjGsWGuU');
+        });
+
+        document.getElementById('dock-ka').addEventListener('click', function(e) {
+            e.preventDefault();
+            openLeaveSite('http://www.coolapk.com/u/3470430');
+        });
+
+        document.getElementById('dock-gh').addEventListener('click', function(e) {
+            e.preventDefault();
+            openLeaveSite('https://github.com/qtqtEricChiu/');
+        });
+
+        document.getElementById('cancelLeaveBtn').addEventListener('click', function() {
+            leaveSiteModal.classList.remove('active');
+            entryPoints.classList.remove('blurred');
+        });
+
+        confirmLeaveBtn.addEventListener('click', function() {
+            leaveSiteModal.classList.remove('active');
+            entryPoints.classList.remove('blurred');
+        });
+
+        document.getElementById('dock-wxc').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (qrModal) {
+                qrModal.classList.add('active');
+                entryPoints.classList.add('blurred');
+                mocabolka.setDockState(false);
+            }
+        });
+
+        document.getElementById('closeQrBtn').addEventListener('click', function() {
+            qrModal.classList.remove('active');
+            entryPoints.classList.remove('blurred');
+        });
+    </script>
+</body>
+</html>
