@@ -66,21 +66,8 @@
             pointer-events: none;
             transition: transform 0.25s ease-out;
             will-change: transform;
-            opacity: 0;
-            animation: stageFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
         .main-stage > * { pointer-events: auto; }
-
-        @keyframes stageFadeIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* page-header 错峰 */
-        .page-header {
-            opacity: 0;
-            animation: stageFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.06s forwards;
-        }
 
         /* ================================================================
            PAGE HEADER
@@ -162,7 +149,7 @@
             backdrop-filter: blur(12px);
             opacity: 0;
             transform: translateY(20px);
-            animation: cardFlyIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s forwards;
+            animation: cardFlyIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
         }
         .profile-info-item {
             display: flex;
@@ -268,23 +255,23 @@
         }
         .game-card:hover .card-shine { opacity: 1; }
 
-        /* 入场延迟 — 从 stage 淡入完成后开始 */
-        .game-card:nth-child(1)  { animation-delay: 0.16s; }
-        .game-card:nth-child(2)  { animation-delay: 0.19s; }
-        .game-card:nth-child(3)  { animation-delay: 0.22s; }
-        .game-card:nth-child(4)  { animation-delay: 0.25s; }
-        .game-card:nth-child(5)  { animation-delay: 0.28s; }
-        .game-card:nth-child(6)  { animation-delay: 0.31s; }
-        .game-card:nth-child(7)  { animation-delay: 0.34s; }
-        .game-card:nth-child(8)  { animation-delay: 0.37s; }
-        .game-card:nth-child(9)  { animation-delay: 0.40s; }
-        .game-card:nth-child(10) { animation-delay: 0.43s; }
-        .game-card:nth-child(11) { animation-delay: 0.46s; }
-        .game-card:nth-child(12) { animation-delay: 0.49s; }
-        .game-card:nth-child(13) { animation-delay: 0.52s; }
-        .game-card:nth-child(14) { animation-delay: 0.55s; }
-        .game-card:nth-child(15) { animation-delay: 0.58s; }
-        .game-card:nth-child(16) { animation-delay: 0.61s; }
+        /* 入场延迟 */
+        .game-card:nth-child(1)  { animation-delay: 0.03s; }
+        .game-card:nth-child(2)  { animation-delay: 0.06s; }
+        .game-card:nth-child(3)  { animation-delay: 0.09s; }
+        .game-card:nth-child(4)  { animation-delay: 0.12s; }
+        .game-card:nth-child(5)  { animation-delay: 0.15s; }
+        .game-card:nth-child(6)  { animation-delay: 0.18s; }
+        .game-card:nth-child(7)  { animation-delay: 0.21s; }
+        .game-card:nth-child(8)  { animation-delay: 0.24s; }
+        .game-card:nth-child(9)  { animation-delay: 0.27s; }
+        .game-card:nth-child(10) { animation-delay: 0.30s; }
+        .game-card:nth-child(11) { animation-delay: 0.33s; }
+        .game-card:nth-child(12) { animation-delay: 0.36s; }
+        .game-card:nth-child(13) { animation-delay: 0.39s; }
+        .game-card:nth-child(14) { animation-delay: 0.42s; }
+        .game-card:nth-child(15) { animation-delay: 0.45s; }
+        .game-card:nth-child(16) { animation-delay: 0.48s; }
 
         @keyframes cardFlyIn {
             to { opacity: 1; transform: translateY(0); }

@@ -20,13 +20,6 @@
         /* ---- resume 专用样式 ---- */
         .card-wrapper {
             max-width: 1400px;
-            opacity: 0;
-            animation: resumeFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s forwards;
-        }
-
-        @keyframes resumeFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         .content-container {
@@ -266,31 +259,46 @@
 
         /* ================================================================
            PDF 加载检测 + 超时飞书引导
+           移动端：内嵌 PDF 几乎必然无法渲染，3 秒后即弹出引导
+           桌面端：10 秒超时兜底
            ================================================================ */
         var pdfTimeoutId = null;
         var pdfResolved = false;
         var guideShown = false;
         var loadingPlaceholder = document.getElementById('pdfLoadingPlaceholder');
         var feishuModal = document.getElementById('feishuGuideModal');
+        var modalDesc = document.querySelector('.feishu-guide-modal .modal-desc');
         var blurTargets = document.querySelectorAll('.resume-blur-target');
+        var isMobile = mocabolka.isMobile;
+
+        // 移动端提示文案
+        var MOBILE_DESC = '移动端浏览器可能无法直接在网页中显示 PDF 简历。<br>建议您前往【飞书文档】在线阅读完整版个人简历。';
+        var DESKTOP_DESC = '简历 PDF 加载可能需要一些时间。<br>您也可以前往【飞书文档】在线阅读完整版个人简历，体验更佳。';
 
         function initPdfDetection() {
             var pdfIframe = document.getElementById('pdfIframe');
             if (!pdfIframe) return;
 
-            // 策略1：监听 iframe load 事件 — PDF 加载完成
+            // 策略1：监听 iframe load 事件 — PDF 加载完成（桌面端有效）
             pdfIframe.addEventListener('load', function() {
                 if (!pdfResolved) {
                     resolvePdfLoading();
                 }
             });
 
-            // 策略2：10秒超时检测 — 如果 PDF 仍未加载完成，弹出飞书引导
+            // 策略2：超时检测
+            // 移动端：3 秒（内嵌 PDF 几乎必然失败）
+            // 桌面端：10 秒（给浏览器足够时间加载）
+            var timeoutMs = isMobile ? 3000 : 10000;
             pdfTimeoutId = setTimeout(function() {
                 if (!pdfResolved && !guideShown) {
+                    // 移动端更新弹窗描述文案
+                    if (isMobile && modalDesc) {
+                        modalDesc.innerHTML = MOBILE_DESC;
+                    }
                     showFeishuGuide();
                 }
-            }, 10000);
+            }, timeoutMs);
         }
 
         function resolvePdfLoading() {
@@ -326,12 +334,15 @@
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function() {
                     hideFeishuGuide();
-                    // 用户选择继续等待，再给 15 秒
+                    // 用户选择继续等待，再给一次机会（移动端 8 秒，桌面端 15 秒）
                     pdfTimeoutId = setTimeout(function() {
                         if (!pdfResolved && !guideShown) {
+                            if (isMobile && modalDesc) {
+                                modalDesc.innerHTML = MOBILE_DESC;
+                            }
                             showFeishuGuide();
                         }
-                    }, 15000);
+                    }, isMobile ? 8000 : 15000);
                 });
             }
 

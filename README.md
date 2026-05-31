@@ -48,6 +48,9 @@ mocabolka.world.with.cody/
 - 玻璃卡片容器内嵌 PDF 预览（iframe）
 - 鼠标悬停卡片产生视差位移
 - PDF 区域内自动隐藏自定义光标
+- **PDF 加载检测**：加载中显示旋转占位动画，加载完成后自动隐藏
+- **飞书文档引导**：若 PDF 超时未加载（移动端 3s / 桌面端 10s），弹出引导浮窗引导用户前往飞书文档在线阅读完整简历
+  - 移动端专属提示文案，明确告知移动浏览器内嵌 PDF 兼容性问题
 
 ### 4. 作品展示 1 (`works/1/`) — HTML&CSS & AI Coding
 
@@ -69,7 +72,7 @@ mocabolka.world.with.cody/
 
 ### 7. 游戏经历 (`timeline/`) — 游戏经历
 
-- 11 张玻璃卡片按游戏类型分类排列（沙盒探索 / 换装搭配 / 二次元 / 赛车竞速 / 模拟经营 / 派对游戏 / 音乐舞蹈 / 角色扮演 / 射击 / 休闲益智）
+- 16 张玻璃卡片按游戏类型分类排列（沙盒探索 / 换装搭配 / 二次元 / 赛车竞速 / 模拟经营 / 派对游戏 / 音乐舞蹈 / 角色扮演 / 射击 / 休闲益智）
 - 包含 Steam 8年用户、Epic Games 4年用户等平台资历概述
 - 游戏时长数据标注（如 Minecraft 2000h、BanG Dream 600+h 等）
 - 卡片悬停位移动画
@@ -90,7 +93,7 @@ mocabolka.world.with.cody/
 
 | 动画效果 | 技术实现 | 应用页面 |
 |----------|----------|----------|
-| **View Transition API** | `@view-transition` + `fade-in/out` 关键帧 | 所有页面间导航 |
+| **闪黑过渡** | JS 拦截导航 → 黑屏遮罩 → 渐消后跳转 | 所有页面间导航 |
 | **自定义光标** | 双元素（dot + ring），ring 带延迟跟随 | 所有桌面端页面 |
 | **光标悬浮膨胀** | `.hovered` 类触发大小/阴影变化 | 所有交互元素 |
 | **粒子背景系统** | Canvas 2D，鼠标吸引+排斥+点击爆破 | 所有页面 |
@@ -100,12 +103,12 @@ mocabolka.world.with.cody/
 | **弹窗弹性动画** | `cubic-bezier(0.19, 1, 0.22, 1)` 弹性缓动 | 所有弹窗 |
 | **Dock 展开动画** | `cubic-bezier(0.175, 0.885, 0.32, 1.275)` 回弹 | 主页, fr/index |
 | **背景模糊过渡** | `.blurred` 类触发 `filter: blur()` | 弹窗打开时的背景 |
-| **黑屏渐消** | 初始加载遮罩 `removeBlackScreen` 动画 | 所有页面 |
+| **黑屏渐消** | 首次访问黑屏遮罩 → 0.8s 后渐消 | 所有页面（仅首次） |
 | **背景切换过渡** | `background-image` 0.8s ease-in-out | 所有页面 |
 | **卡片悬停位移** | `transform: translateX(6px)` | timeline |
 | **画廊滚动吸附** | CSS `scroll-snap-type: x mandatory` | works/3 |
-
 | **倒计时跳转** | JS setInterval 倒计时 | fr/index |
+| **PDF 加载超时引导** | 超时检测 + 移动端/桌面端差异化策略 | fr/resume |
 
 ---
 
@@ -126,7 +129,7 @@ mocabolka.world.with.cody/
 
 - **纯 HTML/CSS/JS**（无框架依赖）
 - **pangu.js**（中英文间距处理）
-- **View Transition API**（跨页面过渡动画）
+- **闪黑过渡**（JS 驱动跨页面导航动画）
 
 ---
 
@@ -137,6 +140,6 @@ mocabolka.world.with.cody/
 - `css/base.css` — 所有页面共用的基础样式（CSS 变量、重置、背景层、光标、加载动画、响应式）
 - `css/components.css` — 通用组件样式（背景切换器、顶部导航、模态弹窗、底部 Dock、玻璃卡片容器、导航按钮、模糊效果）
 - `js/bg-init.js` — 背景预初始化脚本（在 DOM 渲染前执行，防止背景闪烁）
-- `js/core.js` — 核心引擎（`mocabolka` 全局对象，包含背景同步、光标系统、粒子系统、视图过渡、Dock 交互）
+- `js/core.js` — 核心引擎（`mocabolka` 全局对象，包含背景同步、光标系统、粒子系统、闪黑过渡、Dock 交互）
 
 各子页面通过相对路径引用这些文件，页面特有样式和逻辑保留在各页面内联 `<style>` 和 `<script>` 中。

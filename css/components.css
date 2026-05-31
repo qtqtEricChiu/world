@@ -436,27 +436,6 @@
     background: linear-gradient(90deg, transparent, var(--accent-main), transparent);
 }
 
-/* ---- 子页面通用进场动画 ---- */
-@keyframes subPageFadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* 所有子页面的主内容容器：页面打开时执行淡入动画 */
-.sub-page .main-stage,
-.sub-page .main-container,
-.sub-page .card-wrapper {
-    animation: subPageFadeIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-
-/* 按钮/导航的错峰入场 */
-.sub-page .bottom-button-row {
-    animation: subPageFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s both;
-}
-.sub-page .copyright-footer {
-    animation: subPageFadeIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s both;
-}
-
 /* ---- 响应式 ---- */
 @media (max-width: 768px) {
     .bg-switcher {

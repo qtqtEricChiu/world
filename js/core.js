@@ -13,15 +13,29 @@ window.mocabolka = window.mocabolka || {};
     'use strict';
 
     // ============================================================
-    //  0. 初始化 — 检测设备类型 & 跳过跨页遮罩
+    //  0. 初始化 — 检测设备类型 & 闪黑遮罩管理
     // ============================================================
     core.isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
-    // 仅首次访问显示 initial-load-overlay；跨页导航跳过
     var isFirstVisit = sessionStorage.getItem('site-visited') !== '1';
     var overlay = document.getElementById('initial-load-overlay');
-    if (overlay && !isFirstVisit) {
-        overlay.classList.add('skip-overlay');
+
+    if (overlay) {
+        if (isFirstVisit) {
+            // 首次访问：黑屏 → 渐消（0.8s 后开始）
+            overlay.style.opacity = '1';
+            setTimeout(function() {
+                overlay.style.opacity = '0';
+                setTimeout(function() {
+                    if (overlay.style.opacity === '0') {
+                        overlay.classList.add('skip-overlay');
+                    }
+                }, 500);
+            }, 800);
+        } else {
+            // 跨页导航：跳过遮罩（页面已被闪黑过渡接管）
+            overlay.classList.add('skip-overlay');
+        }
     }
 
     // 仅首次访问时播放 bg-switcher 入场动画（跨页不重复动画）
@@ -250,19 +264,43 @@ window.mocabolka = window.mocabolka || {};
     initParticles();
 
     // ============================================================
-    //  4. View Transition - 跨页面光标坐标保存
+    //  4. 闪黑过渡 - 跨页面导航
     // ============================================================
-    function bindViewTransition() {
+    function bindPageTransition() {
         document.querySelectorAll('.page-link').forEach(function(link) {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function(e) {
+                var href = link.getAttribute('href');
+                if (!href) return;
+
+                // 保存光标和背景状态
                 sessionStorage.setItem('cursor-x', core.mouseX);
                 sessionStorage.setItem('cursor-y', core.mouseY);
-                // 标记为跨页导航，后续页面跳过遮罩
                 sessionStorage.setItem('bg-index', core.bgIndex);
+
+                // 阻止默认导航，先闪黑再跳转
+                e.preventDefault();
+
+                var overlay = document.getElementById('initial-load-overlay');
+                if (overlay) {
+                    // 闪黑
+                    overlay.classList.add('flash-black');
+                    overlay.classList.remove('fade-out', 'skip-overlay');
+                    overlay.style.opacity = '1';
+
+                    // 短暂延迟后触发导航 + 渐消
+                    setTimeout(function() {
+                        overlay.classList.add('fade-out');
+                        setTimeout(function() {
+                            window.location.href = href;
+                        }, 150);
+                    }, 180);
+                } else {
+                    window.location.href = href;
+                }
             });
         });
     }
-    bindViewTransition();
+    bindPageTransition();
 
     // ============================================================
     //  5. Dock 面板交互

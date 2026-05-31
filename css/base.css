@@ -42,75 +42,7 @@ body, html {
     -webkit-font-smoothing: antialiased;
 }
 
-/* ---- View Transition 增强 —— 跨页面丝滑动画 ---- */
-@view-transition {
-    navigation: auto;
-}
-
-/*
- * 策略说明：
- * - root 级别：旧页面淡出 → 新页面淡入，形成柔和的交叉渐变。
- * - 持久元素（bg, switcher, nav, particles）：
- *   old 保持可见（opacity:1），new 也直接显示（opacity:1），
- *   避免在转场中出现"闪烁/重置"的硬切感。
- *   视觉上背景和导航栏自然接续，仅有内容区淡入淡出。
- */
-
-/* 旧页面整体：轻微淡出 */
-::view-transition-old(root) {
-    animation: vt-old-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* 新页面整体：淡入 */
-::view-transition-new(root) {
-    animation: vt-new-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    mix-blend-mode: normal;
-}
-
-@keyframes vt-old-out {
-    0%   { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-@keyframes vt-new-in {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-/* 持久化元素：在转场中保持连续，old 和 new 都可见 */
-.bg-wrapper,
-.bg-overlay {
-    view-transition-name: vt-bg;
-}
-.bg-switcher {
-    view-transition-name: vt-switcher;
-}
-.top-nav {
-    view-transition-name: vt-nav;
-}
-#particle-canvas {
-    view-transition-name: vt-particles;
-}
-
-/* old 持久元素保持完全可见（不淡出） */
-::view-transition-old(vt-bg),
-::view-transition-old(vt-switcher),
-::view-transition-old(vt-nav),
-::view-transition-old(vt-particles) {
-    animation: none;
-    opacity: 1;
-}
-
-/* new 持久元素也直接显示（不淡入），实现视觉接续 */
-::view-transition-new(vt-bg),
-::view-transition-new(vt-switcher),
-::view-transition-new(vt-nav),
-::view-transition-new(vt-particles) {
-    animation: none;
-    opacity: 1;
-}
-
-/* ---- 初始加载动画 —— 仅首次访问显示，后续跨页不显示遮罩 ---- */
+/* ---- 闪黑过渡遮罩（首次访问 & 跨页导航共用） ---- */
 #initial-load-overlay {
     position: fixed;
     top: 0;
@@ -119,21 +51,27 @@ body, html {
     height: 100%;
     z-index: 99999;
     pointer-events: none;
-    background: radial-gradient(ellipse at center, rgba(10, 15, 22, 0.3) 0%, rgba(0, 0, 0, 1) 100%);
-    animation: initialReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    background: #000;
+    opacity: 1;
+    transition: opacity 0.35s ease;
 }
 
-/* 跨页导航时隐藏 overlay（由 JS 控制 .skip-overlay 类） */
-#initial-load-overlay.skip-overlay {
-    animation: none;
+/* 跨页导航时短暂闪黑（由 JS 控制 .flash-black 类） */
+#initial-load-overlay.flash-black {
+    opacity: 1;
+    transition: none;
+}
+
+/* 闪黑结束 → 渐消 */
+#initial-load-overlay.flash-black.fade-out {
     opacity: 0;
-    visibility: hidden;
+    transition: opacity 0.45s ease;
 }
 
-@keyframes initialReveal {
-    0%   { opacity: 1; }
-    70%  { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
+/* 跨页导航跳过初始加载动画 */
+#initial-load-overlay.skip-overlay {
+    opacity: 0;
+    transition: none;
 }
 
 /* ---- 自定义光标系统 ---- */
@@ -267,49 +205,6 @@ body, html {
         font-size: 0.7rem;
     }
 
-    /* 移动端 View Transition 加速 — 保持与桌面端一致的策略 */
-    ::view-transition-old(root) {
-        animation: vt-old-out-mobile 0.2s ease forwards;
-    }
-    ::view-transition-new(root) {
-        animation: vt-new-in-mobile 0.2s ease forwards;
-    }
-
-    @keyframes vt-old-out-mobile {
-        0%   { opacity: 1; }
-        100% { opacity: 0; }
-    }
-
-    @keyframes vt-new-in-mobile {
-        0%   { opacity: 0; }
-        100% { opacity: 1; }
-    }
-
-    /* 移动端持久元素 — old 和 new 都可见，保证流畅接续 */
-    ::view-transition-old(vt-bg),
-    ::view-transition-old(vt-switcher),
-    ::view-transition-old(vt-nav),
-    ::view-transition-old(vt-particles) {
-        animation: none !important;
-        opacity: 1;
-    }
-    ::view-transition-new(vt-bg),
-    ::view-transition-new(vt-switcher),
-    ::view-transition-new(vt-nav),
-    ::view-transition-new(vt-particles) {
-        animation: none !important;
-        opacity: 1;
-    }
-
-    /* 移动端初始加载加速 */
-    #initial-load-overlay {
-        animation: initialRevealMobile 0.4s ease forwards;
-    }
-
-    @keyframes initialRevealMobile {
-        0%   { opacity: 1; }
-        100% { opacity: 0; visibility: hidden; }
-    }
 }
 
 /* ---- 平板 (768px-1024px) 中间断点 ---- */
@@ -323,8 +218,6 @@ body, html {
 
 /* ---- 减少动画偏好 ---- */
 @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(root),
-    ::view-transition-new(root),
     #initial-load-overlay,
     .node,
     .game-card,

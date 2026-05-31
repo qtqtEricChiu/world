@@ -31,13 +31,6 @@
             z-index: 10;
             padding: 20px;
             perspective: 1000px;
-            opacity: 0;
-            animation: worksFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        @keyframes worksFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         .iframe-wrapper {
@@ -63,8 +56,6 @@
             overflow: hidden;
             position: relative;
             transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-            opacity: 0;
-            animation: worksFadeIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.08s forwards;
         }
 
         #works-frame {
