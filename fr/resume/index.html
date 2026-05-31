@@ -20,6 +20,13 @@
         /* ---- resume 专用样式 ---- */
         .card-wrapper {
             max-width: 1400px;
+            opacity: 0;
+            animation: resumeFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s forwards;
+        }
+
+        @keyframes resumeFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .content-container {
@@ -48,6 +55,123 @@
             display: block;
         }
 
+        /* PDF 加载中占位提示 */
+        .pdf-loading-placeholder {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: rgba(200, 215, 230, 0.5);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .pdf-loading-spinner {
+            width: 32px; height: 32px;
+            border: 2px solid rgba(154, 200, 226, 0.15);
+            border-top-color: var(--accent-main);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 飞书引导浮窗（与 works/1 的 modal 一致） */
+        .feishu-guide-modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -45%) scale(0.95);
+            width: 90vw;
+            max-width: 460px;
+            background: rgba(10, 15, 20, 0.75);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            z-index: 55;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 36px 24px 28px;
+            text-align: center;
+        }
+        .feishu-guide-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .feishu-guide-modal .modal-title {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 12px;
+            font-weight: 500;
+            letter-spacing: 2px;
+        }
+        .feishu-guide-modal .modal-desc {
+            font-size: 0.9rem;
+            color: var(--accent-light);
+            line-height: 1.7;
+            font-weight: 300;
+            margin-bottom: 24px;
+        }
+        .feishu-guide-modal .modal-btn-group {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            justify-content: center;
+        }
+        .feishu-guide-modal .modal-btn {
+            padding: 10px 28px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feishu-guide-modal .btn-cancel {
+            background: rgba(154, 200, 226, 0.03);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .feishu-guide-modal .btn-cancel:hover {
+            background: rgba(154, 200, 226, 0.1);
+            border-color: var(--accent-main);
+        }
+        .feishu-guide-modal .btn-confirm {
+            background: rgba(154, 200, 226, 0.15);
+            color: var(--accent-main);
+            border: 1px solid var(--accent-main);
+        }
+        .feishu-guide-modal .btn-confirm:hover {
+            background: rgba(154, 200, 226, 0.25);
+            box-shadow: 0 0 20px rgba(154, 200, 226, 0.5);
+            color: #fff;
+        }
+
+        /* 弹窗打开时模糊底层 */
+        .resume-blur-target {
+            transition: filter 0.4s ease, opacity 0.4s ease;
+        }
+        .resume-blur-target.blurred {
+            filter: blur(8px);
+            opacity: 0.4;
+            pointer-events: none !important;
+        }
+
         @media (max-width: 768px) {
             .card-wrapper {
                 width: 94vw;
@@ -70,6 +194,10 @@
             .copyright-footer {
                 bottom: calc(10px + var(--safe-bottom));
                 font-size: 0.7rem;
+            }
+            .feishu-guide-modal {
+                max-width: 88vw;
+                padding: 28px 18px 24px;
             }
         }
     </style>
@@ -98,18 +226,32 @@
         </a>
     </div>
 
-    <div class="card-wrapper" id="parallaxCard">
+    <div class="card-wrapper resume-blur-target" id="parallaxCard">
         <div class="blur-background"></div>
         <div class="content-container">
             <div class="pdf-viewer-box interactable" id="pdfContainer">
-                <iframe src="../../res/pdf/%E9%82%B1%E6%B7%BB%E7%AE%80%E5%8E%86-%E6%96%B0%E5%AA%92%E4%BD%93%E8%BF%90%E8%90%A5%E8%90%A5%E9%94%80%E7%94%A8%E5%B8%82%E7%A0%94%E5%8F%91%E8%A1%8C%E6%8A%95%E6%94%BE%E5%85%AC%E5%85%B3-27%E5%BA%94%E5%B1%8A-3-6%E6%9C%88.pdf" type="application/pdf">
-                    <p>您的浏览器不支持直接在网页中阅读 PDF，请 <a href="../../res/pdf/%E9%82%B1%E6%B7%BB%E7%AE%80%E5%8E%86-%E6%96%B0%E5%AA%92%E4%BD%93%E8%BF%90%E8%90%A5%E8%90%A5%E9%94%80%E7%94%A8%E5%B8%82%E7%A0%94%E5%8F%91%E8%A1%8C%E6%8A%95%E6%94%BE%E5%85%AC%E5%85%B3-27%E5%BA%94%E5%B1%8A-3-6%E6%9C%88.pdf" target="_blank" style="color: var(--accent-main);">点击此处下载阅读</a>。</p>
+                <!-- PDF 加载中占位 -->
+                <div class="pdf-loading-placeholder" id="pdfLoadingPlaceholder">
+                    <div class="pdf-loading-spinner"></div>
+                    <span>简历加载中…</span>
+                </div>
+                <iframe id="pdfIframe" src="../../res/pdf/%E9%82%B1%E6%B7%BB%E7%AE%80%E5%8E%86-%E6%96%B0%E5%AA%92%E4%BD%93%E8%BF%90%E8%90%A5%E8%90%A5%E9%94%80%E7%94%A8%E5%B8%82%E7%A0%94%E5%8F%91%E8%A1%8C%E6%8A%95%E6%94%BE%E5%85%AC%E5%85%B3-27%E5%BA%94%E5%B1%8A-3-6%E6%9C%88.pdf" type="application/pdf">
                 </iframe>
             </div>
         </div>
     </div>
 
-    <div class="copyright-footer">©Eric Chiu，网页使用AI辅助生成</div>
+    <!-- 飞书文档引导浮窗 -->
+    <div class="feishu-guide-modal" id="feishuGuideModal">
+        <h2 class="modal-title">温馨提示</h2>
+        <p class="modal-desc">简历 PDF 加载可能需要一些时间。<br>您也可以前往【飞书文档】在线阅读完整版个人简历，体验更佳。</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn btn-cancel interactable" id="cancelFeishuBtn">继续等待</button>
+            <a href="https://my.feishu.cn/wiki/AJb2wzw5PiiD69kW6xxcIkbqnUc" target="_blank" class="modal-btn btn-confirm interactable" id="confirmFeishuBtn">前往飞书文档</a>
+        </div>
+    </div>
+
+    <div class="copyright-footer resume-blur-target">©Eric Chiu，网页使用AI辅助生成</div>
 
     <!-- 共用核心 JS -->
     <script src="../../js/core.js"></script>
@@ -118,7 +260,87 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof pangu !== 'undefined') pangu.spacingPage();
+            initPdfDetection();
+            initFeishuModal();
         });
+
+        /* ================================================================
+           PDF 加载检测 + 超时飞书引导
+           ================================================================ */
+        var pdfTimeoutId = null;
+        var pdfResolved = false;
+        var guideShown = false;
+        var loadingPlaceholder = document.getElementById('pdfLoadingPlaceholder');
+        var feishuModal = document.getElementById('feishuGuideModal');
+        var blurTargets = document.querySelectorAll('.resume-blur-target');
+
+        function initPdfDetection() {
+            var pdfIframe = document.getElementById('pdfIframe');
+            if (!pdfIframe) return;
+
+            // 策略1：监听 iframe load 事件 — PDF 加载完成
+            pdfIframe.addEventListener('load', function() {
+                if (!pdfResolved) {
+                    resolvePdfLoading();
+                }
+            });
+
+            // 策略2：10秒超时检测 — 如果 PDF 仍未加载完成，弹出飞书引导
+            pdfTimeoutId = setTimeout(function() {
+                if (!pdfResolved && !guideShown) {
+                    showFeishuGuide();
+                }
+            }, 10000);
+        }
+
+        function resolvePdfLoading() {
+            pdfResolved = true;
+            clearTimeout(pdfTimeoutId);
+            if (loadingPlaceholder) {
+                loadingPlaceholder.style.display = 'none';
+            }
+        }
+
+        /* ================================================================
+           飞书引导浮窗（与 works/1 的 LarkModal 一致）
+           ================================================================ */
+        function showFeishuGuide() {
+            guideShown = true;
+            if (feishuModal) {
+                feishuModal.classList.add('active');
+            }
+            blurTargets.forEach(function(el) { el.classList.add('blurred'); });
+        }
+
+        function hideFeishuGuide() {
+            if (feishuModal) {
+                feishuModal.classList.remove('active');
+            }
+            blurTargets.forEach(function(el) { el.classList.remove('blurred'); });
+        }
+
+        function initFeishuModal() {
+            var cancelBtn = document.getElementById('cancelFeishuBtn');
+            var confirmBtn = document.getElementById('confirmFeishuBtn');
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    hideFeishuGuide();
+                    // 用户选择继续等待，再给 15 秒
+                    pdfTimeoutId = setTimeout(function() {
+                        if (!pdfResolved && !guideShown) {
+                            showFeishuGuide();
+                        }
+                    }, 15000);
+                });
+            }
+
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    hideFeishuGuide();
+                });
+            }
+        }
 
         /* PDF iframe 光标处理 */
         var pdfContainer = document.getElementById('pdfContainer');
