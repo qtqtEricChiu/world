@@ -1,7 +1,6 @@
 /* ============================================================
    mocabolka.world - Base Styles
-   基础样式：CSS 变量、重置、背景、光标、加载动画、响应式
-   新增：View Transition 增强、陀螺仪动画支持、移动端全面优化
+   基础样式：CSS 变量、重置、背景、光标、闪黑过渡、响应式
    ============================================================ */
 
 /* ---- CSS 变量 ---- */
@@ -53,25 +52,56 @@ body, html {
     pointer-events: none;
     background: #000;
     opacity: 1;
-    transition: opacity 0.35s ease;
 }
 
-/* 跨页导航时短暂闪黑（由 JS 控制 .flash-black 类） */
-#initial-load-overlay.flash-black {
-    opacity: 1;
-    transition: none;
+/*
+ * 首次访问：黑屏覆盖，1.0s 后使用 CSS animation 渐消
+ * 曲线 cubic-bezier(0.4, 0, 0.2, 1) — Material Design 标准缓出
+ * animation-fill-mode: forwards 保持最终状态（opacity:0, visibility:hidden）
+ */
+#initial-load-overlay.first-visit {
+    animation: overlayFadeOut 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: 1.0s;
 }
 
-/* 闪黑结束 → 渐消 */
-#initial-load-overlay.flash-black.fade-out {
-    opacity: 0;
-    transition: opacity 0.45s ease;
+/*
+ * 跨页导航 — 闪黑效果
+ * 阶段1（0%→30%）：快速从透明变为全黑（0.25s）
+ * 阶段2（30%→100%）：保持全黑一小段再渐消（总共 0.7s）
+ */
+#initial-load-overlay.flash-out {
+    animation: flashBlackOut 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* 跨页导航跳过初始加载动画 */
+/*
+ * 跨页导航 — 进入新页面时从黑屏渐消
+ * 新页面加载后立即播放，配合目标页面的内容出现
+ */
+#initial-load-overlay.fade-in {
+    animation: overlayFadeOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: 0.15s;
+}
+
+/* 跳过遮罩（非跨页导航场景，如浏览器的后退/前进） */
 #initial-load-overlay.skip-overlay {
     opacity: 0;
-    transition: none;
+    animation: none;
+}
+
+/* ===== 动画关键帧 ===== */
+
+/* 首次访问渐消：从全黑到完全透明 */
+@keyframes overlayFadeOut {
+    0%   { opacity: 1; visibility: visible; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+/* 跨页闪黑：快速变黑 → 保持 → 渐消 */
+@keyframes flashBlackOut {
+    0%   { opacity: 0; }
+    25%  { opacity: 1; }
+    60%  { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
 }
 
 /* ---- 自定义光标系统 ---- */
@@ -218,7 +248,9 @@ body, html {
 
 /* ---- 减少动画偏好 ---- */
 @media (prefers-reduced-motion: reduce) {
-    #initial-load-overlay,
+    #initial-load-overlay.first-visit,
+    #initial-load-overlay.flash-out,
+    #initial-load-overlay.fade-in,
     .node,
     .game-card,
     .card-wrapper {

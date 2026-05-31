@@ -1,6 +1,6 @@
 /* ============================================================
    mocabolka.world - Core JavaScript
-   核心引擎：背景同步、光标系统、粒子系统、视图过渡、Dock
+   核心引擎：背景同步、光标系统、粒子系统、闪黑过渡、Dock
    ============================================================ */
 
 /**
@@ -19,21 +19,18 @@ window.mocabolka = window.mocabolka || {};
 
     var isFirstVisit = sessionStorage.getItem('site-visited') !== '1';
     var overlay = document.getElementById('initial-load-overlay');
+    var isFlashTransition = sessionStorage.getItem('flash-transition') === '1';
 
     if (overlay) {
         if (isFirstVisit) {
-            // 首次访问：黑屏 → 渐消（0.8s 后开始）
-            overlay.style.opacity = '1';
-            setTimeout(function() {
-                overlay.style.opacity = '0';
-                setTimeout(function() {
-                    if (overlay.style.opacity === '0') {
-                        overlay.classList.add('skip-overlay');
-                    }
-                }, 500);
-            }, 800);
+            // 首次访问：CSS animation 控制渐消（base.css 中定义）
+            overlay.classList.add('first-visit');
+        } else if (isFlashTransition) {
+            // 跨页导航到达目标页：从黑屏渐消，配合内容展现
+            overlay.classList.add('fade-in');
+            sessionStorage.removeItem('flash-transition');
         } else {
-            // 跨页导航：跳过遮罩（页面已被闪黑过渡接管）
+            // 非跨页导航（如浏览器后退）：跳过遮罩
             overlay.classList.add('skip-overlay');
         }
     }
@@ -265,6 +262,13 @@ window.mocabolka = window.mocabolka || {};
 
     // ============================================================
     //  4. 闪黑过渡 - 跨页面导航
+    //    原理：
+    //      离开页：overlay 播放 flashBlackOut（快速变黑 → 渐消）
+    //      动画中途触发导航，浏览器开始加载新页面
+    //      新页面：overlay 播放 fade-in（从黑渐消），与内容同时展现
+    //    时序设计：
+    //      flashBlackOut 在 0.25s 处变全黑，0.42s 开始渐消
+    //      在 0.35s 处导航 — 此时画面全黑，用户看不到内容切换
     // ============================================================
     function bindPageTransition() {
         document.querySelectorAll('.page-link').forEach(function(link) {
@@ -277,26 +281,26 @@ window.mocabolka = window.mocabolka || {};
                 sessionStorage.setItem('cursor-y', core.mouseY);
                 sessionStorage.setItem('bg-index', core.bgIndex);
 
-                // 阻止默认导航，先闪黑再跳转
+                // 标记：目标页面应播放闪黑入场动画
+                sessionStorage.setItem('flash-transition', '1');
+
+                // 阻止默认导航
                 e.preventDefault();
 
                 var overlay = document.getElementById('initial-load-overlay');
-                if (overlay) {
-                    // 闪黑
-                    overlay.classList.add('flash-black');
-                    overlay.classList.remove('fade-out', 'skip-overlay');
-                    overlay.style.opacity = '1';
-
-                    // 短暂延迟后触发导航 + 渐消
-                    setTimeout(function() {
-                        overlay.classList.add('fade-out');
-                        setTimeout(function() {
-                            window.location.href = href;
-                        }, 150);
-                    }, 180);
-                } else {
+                if (!overlay) {
                     window.location.href = href;
+                    return;
                 }
+
+                // 移除其他状态类，启动 flashBlackOut 动画
+                overlay.classList.remove('first-visit', 'fade-in', 'skip-overlay');
+                overlay.classList.add('flash-out');
+
+                // 在闪黑完全覆盖画面后导航（350ms）
+                setTimeout(function() {
+                    window.location.href = href;
+                }, 350);
             });
         });
     }
