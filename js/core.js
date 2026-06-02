@@ -46,15 +46,67 @@ window.mocabolka = window.mocabolka || {};
 
     // ============================================================
     //  1. 背景系统 (Bg Sync)
+    //    图库池 + 随机选取 + localStorage 持久化，全站继承
     // ============================================================
-    core.bgs = [
+
+    // 完整图库（在此添加更多图片链接以扩充图库）
+    var BG_IMAGE_POOL = [
         'https://s1.1ovv.com/2026/03/21/Ix6I.png',
         'https://s1.1ovv.com/2026/03/21/IxkP.png',
         'https://s1.1ovv.com/2026/03/21/I5rf.png',
         'https://s1.1ovv.com/2026/03/21/I5Wi.png'
     ];
 
+    // 默认兜底列表（当图库不足 4 张时使用）
+    var DEFAULT_BGS = [
+        'https://s1.1ovv.com/2026/03/21/Ix6I.png',
+        'https://s1.1ovv.com/2026/03/21/IxkP.png',
+        'https://s1.1ovv.com/2026/03/21/I5rf.png',
+        'https://s1.1ovv.com/2026/03/21/I5Wi.png'
+    ];
+
+    // 从数组中随机选出 count 张不重复的图片
+    function pickRandomImages(pool, count) {
+        count = count || 4;
+        var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+        return shuffled.slice(0, Math.min(count, shuffled.length));
+    }
+
+    // 获取本次会话的背景图列表（优先从 localStorage 读取）
+    function getSessionBackgrounds() {
+        var stored = localStorage.getItem('mocabolka_bg_list');
+        if (stored) {
+            try {
+                var parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length === 4) {
+                    return parsed;
+                }
+            } catch (e) {}
+        }
+        // 从图库随机选 4 张（不足 4 张时使用默认兜底）
+        var pool = BG_IMAGE_POOL.length >= 4 ? BG_IMAGE_POOL : DEFAULT_BGS;
+        var newList = pickRandomImages(pool, 4);
+        localStorage.setItem('mocabolka_bg_list', JSON.stringify(newList));
+        return newList;
+    }
+
+    // 获取本次会话的 4 张背景图
+    core.bgs = getSessionBackgrounds();
+
+    // 更新 sw-btn 缩略图背景
+    function updateSwBtnBackgrounds(bgList) {
+        var swBtns = document.querySelectorAll('.sw-btn');
+        swBtns.forEach(function(btn, i) {
+            if (bgList[i]) {
+                btn.style.backgroundImage = 'url("' + bgList[i] + '")';
+            }
+        });
+    }
+    updateSwBtnBackgrounds(core.bgs);
+
     core.bgIndex = parseInt(sessionStorage.getItem('bg-index')) || 0;
+    // 确保索引不越界
+    if (core.bgIndex >= core.bgs.length) core.bgIndex = 0;
 
     core.applyBg = function(index) {
         var bgEl = document.getElementById('mainBg');
