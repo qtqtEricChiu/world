@@ -118,54 +118,291 @@
         }
 
         /* ================================================================
-           内容占位区
+           内容区 - 项目展示
            ================================================================ */
-        .content-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
+        .content-body {
             width: 100%;
             max-width: 1400px;
-            min-height: 400px;
-            padding: 60px 40px;
-            background: rgba(15, 20, 30, 0.35);
-            border: 1px solid rgba(154, 200, 226, 0.1);
-            border-radius: 18px;
-            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
             opacity: 0;
             transform: translateY(20px);
             animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
         }
-        .placeholder-icon {
-            width: 64px; height: 64px;
+
+        /* ---- 简介区 ---- */
+        .intro-section {
+            text-align: center;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .intro-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
             border-radius: 20px;
             background: rgba(154, 200, 226, 0.06);
             border: 1px solid rgba(154, 200, 226, 0.15);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .placeholder-icon svg {
-            width: 32px; height: 32px;
-            stroke: var(--accent-dark);
-            fill: none; stroke-width: 1.5;
-        }
-        .placeholder-text {
-            font-size: 1.1rem;
-            color: rgba(200, 215, 230, 0.45);
-            font-weight: 300;
+            font-size: 0.75rem;
             letter-spacing: 2px;
-            text-align: center;
+            color: var(--accent-dark);
+            text-transform: uppercase;
+            margin-bottom: 20px;
         }
-        .placeholder-subtext {
-            font-size: 0.82rem;
-            color: rgba(200, 215, 230, 0.25);
+        .intro-badge svg { width: 14px; height: 14px; stroke: var(--accent-dark); fill: none; stroke-width: 1.5; }
+        .intro-title {
+            font-size: 1.6rem;
             font-weight: 300;
-            letter-spacing: 1px;
-            text-align: center;
+            color: #fff;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .intro-title .accent {
+            font-weight: 500;
+            background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .intro-desc {
+            font-size: 0.88rem;
+            color: rgba(200, 215, 230, 0.5);
+            font-weight: 300;
+            line-height: 1.8;
         }
 
-        @keyframes fadeInUp {
+        /* ---- 项目网格 ---- */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        /* ---- 项目卡片 ---- */
+        .project-card {
+            position: relative;
+            border-radius: 18px;
+            background: rgba(15, 20, 30, 0.45);
+            border: 1px solid rgba(154, 200, 226, 0.1);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        border-color 0.35s ease,
+                        box-shadow 0.35s ease;
+        }
+        .project-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(154, 200, 226, 0.04), transparent 60%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(154, 200, 226, 0.25);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        .project-card:hover::before { opacity: 1; }
+
+        .card-inner {
+            position: relative;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 卡片头部 */
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .card-icon {
+            width: 52px; height: 52px;
+            flex-shrink: 0;
+            border-radius: 14px;
+            background: rgba(154, 200, 226, 0.06);
+            border: 1px solid rgba(154, 200, 226, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .project-card:hover .card-icon {
+            background: rgba(154, 200, 226, 0.12);
+            border-color: rgba(154, 200, 226, 0.3);
+        }
+        .card-icon svg { width: 26px; height: 26px; stroke: var(--accent-main); fill: none; stroke-width: 1.5; }
+        .card-title-block { flex: 1; }
+        .card-path {
+            font-size: 0.7rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--accent-dark);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 400;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        /* 卡片描述 */
+        .card-desc {
+            font-size: 0.85rem;
+            color: rgba(200, 215, 230, 0.55);
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        /* 功能标签 */
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(154, 200, 226, 0.05);
+            border: 1px solid rgba(154, 200, 226, 0.1);
+            font-size: 0.72rem;
+            color: rgba(200, 215, 230, 0.5);
+            letter-spacing: 0.5px;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+        .project-card:hover .tag {
+            background: rgba(154, 200, 226, 0.1);
+            color: rgba(200, 215, 230, 0.7);
+        }
+
+        /* 卡片底部 */
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid rgba(154, 200, 226, 0.06);
+        }
+        .card-tech {
+            font-size: 0.72rem;
+            color: rgba(200, 215, 230, 0.3);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(154, 200, 226, 0.08);
+            border: 1px solid rgba(154, 200, 226, 0.15);
+            color: var(--accent-main);
+            font-size: 0.78rem;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease;
+        }
+        .card-link:hover {
+            background: rgba(154, 200, 226, 0.15);
+            border-color: rgba(154, 200, 226, 0.3);
+            transform: scale(1.03);
+        }
+        .card-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* ---- 早期作品区 ---- */
+        .early-works-section {
+            margin-top: 16px;
+        }
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(154, 200, 226, 0.15), transparent);
+        }
+        .divider-text {
+            font-size: 0.72rem;
+            letter-spacing: 3px;
+            color: rgba(200, 215, 230, 0.3);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .early-works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .early-work-card {
+            position: relative;
+            border-radius: 14px;
+            background: rgba(15, 20, 30, 0.3);
+            border: 1px solid rgba(154, 200, 226, 0.06);
+            backdrop-filter: blur(8px);
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .early-work-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(154, 200, 226, 0.15);
+        }
+        .early-work-inner {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .early-work-title {
+            font-size: 1rem;
+            font-weight: 400;
+            color: rgba(200, 215, 230, 0.7);
+            line-height: 1.4;
+        }
+        .early-work-desc {
+            font-size: 0.8rem;
+            color: rgba(200, 215, 230, 0.35);
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        .early-work-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: var(--accent-dark);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: color 0.25s ease;
+            margin-top: 4px;
+        }
+        .early-work-link:hover { color: var(--accent-main); }
+        .early-work-link svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* ---- 卡片入场动画 ---- */
+        .project-card,
+        .early-work-card {
+            opacity: 0;
+            transform: translateY(24px);
+            animation: cardIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .project-card:nth-child(1) { animation-delay: 0.35s; }
+        .project-card:nth-child(2) { animation-delay: 0.5s; }
+        .project-card:nth-child(3) { animation-delay: 0.65s; }
+        .early-work-card:nth-child(1) { animation-delay: 0.8s; }
+        .early-work-card:nth-child(2) { animation-delay: 0.95s; }
+
+        @keyframes cardIn {
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -186,8 +423,10 @@
             .header-title { font-size: 2rem; letter-spacing: 4px; }
             .header-icon-block { width: 54px; height: 54px; }
             .header-icon-inner svg { width: 32px; height: 32px; }
-            .content-placeholder { padding: 40px 20px; min-height: 280px; }
-            .placeholder-text { font-size: 0.95rem; }
+            .content-body { gap: 32px; }
+            .intro-title { font-size: 1.25rem; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .early-works-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -233,21 +472,175 @@
         </div>
     </div>
 
-    <!-- 内容占位区 -->
-    <div class="content-placeholder">
-        <div class="placeholder-icon">
-            <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 2 L12 6"/>
-                <path d="M12 18 L12 22"/>
-                <path d="M2 12 L6 12"/>
-                <path d="M18 12 L22 12"/>
-                <circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/>
-            </svg>
+    <!-- 内容主体 -->
+    <div class="content-body">
+
+        <!-- 简介区 -->
+        <div class="intro-section">
+            <div class="intro-badge">
+                <svg viewBox="0 0 24 24"><path d="M12 2 L15 8 L22 9 L17 14 L18 22 L12 18 L6 22 L7 14 L2 9 L9 8 Z"/></svg>
+                Vibe Coding · AI 辅助开发
+            </div>
+            <h2 class="intro-title">
+                使用 <span class="accent">AI</span> 进行单页应用开发实践
+            </h2>
+            <p class="intro-desc">
+                以下项目均通过 AI 辅助完成核心功能开发与 Bug 修复，采用 Vibe Coding 模式——自然语言描述需求，AI 生成并迭代代码。涵盖多媒体处理、工具类 SPA 等场景。
+            </p>
         </div>
-        <div class="placeholder-text">内容准备中</div>
-        <div class="placeholder-subtext">Content Coming Soon</div>
-    </div>
+
+        <!-- 项目网格 -->
+        <div class="projects-grid">
+
+            <!-- /muse/ 本地音乐播放器 -->
+            <div class="project-card">
+                <div class="card-inner">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 18V5l12-2v13"/>
+                                <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                            </svg>
+                        </div>
+                        <div class="card-title-block">
+                            <div class="card-path">/muse/</div>
+                            <h3 class="card-title">本地音乐播放器</h3>
+                        </div>
+                    </div>
+                    <p class="card-desc">
+                        完全支持纯手柄/键盘操作的本地音乐播放器。纯前端运行，无需后端，支持 MP3/FLAC/WAV 等格式及 LRC 歌词解析。全域 60FPS 色音同步视觉引擎，支持 Media Session API、PWA、画中画模式。
+                    </p>
+                    <div class="card-tags">
+                        <span class="tag">LRC 解析引擎</span>
+                        <span class="tag">60FPS 视觉引擎</span>
+                        <span class="tag">手柄完全映射</span>
+                        <span class="tag">动态取色</span>
+                        <span class="tag">Crossfade</span>
+                        <span class="tag">PWA</span>
+                        <span class="tag">画中画</span>
+                        <span class="tag">节能模式</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-tech">HTML / CSS / JS · Web Audio API</span>
+                        <a href="https://qtqtericchiu.github.io/muse/" target="_blank" class="card-link interactable">
+                            访问项目
+                            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- /graphic/ 本地图片清理工具 -->
+            <div class="project-card">
+                <div class="card-inner">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </div>
+                        <div class="card-title-block">
+                            <div class="card-path">/graphic/</div>
+                            <h3 class="card-title">本地图片清理工具</h3>
+                        </div>
+                    </div>
+                    <p class="card-desc">
+                        快速筛图工具，帮助快速筛选大量照片。全键盘快捷键支持，Cookie 记忆，平板触控+单手模式。支持收藏、自定义文件夹移动，设有后悔药 .MediaTrash 防止真正删除。
+                    </p>
+                    <div class="card-tags">
+                        <span class="tag">随机筛图</span>
+                        <span class="tag">全键盘快捷键</span>
+                        <span class="tag">触控支持</span>
+                        <span class="tag">后悔药机制</span>
+                        <span class="tag">可撤销操作</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-tech">HTML / CSS / JS · File System API</span>
+                        <a href="https://qtqtericchiu.github.io/tools/graphic/" target="_blank" class="card-link interactable">
+                            访问项目
+                            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- /wtmk/ 水印生成器 -->
+            <div class="project-card">
+                <div class="card-inner">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                        </div>
+                        <div class="card-title-block">
+                            <div class="card-path">/wtmk/</div>
+                            <h3 class="card-title">水印生成器</h3>
+                        </div>
+                    </div>
+                    <p class="card-desc">
+                        为非 OPPO 拍摄照片添加高仿 OPPO 哈苏水印。纯前端 Canvas 实现，上传照片后实时预览水印效果，支持自定义参数并导出成品图片。
+                    </p>
+                    <div class="card-tags">
+                        <span class="tag">Canvas 渲染</span>
+                        <span class="tag">实时预览</span>
+                        <span class="tag">参数可调</span>
+                        <span class="tag">图片导出</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-tech">HTML / CSS / JS · Canvas API</span>
+                        <a href="https://qtqtericchiu.github.io/tools/wtmk/" target="_blank" class="card-link interactable">
+                            访问项目
+                            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.projects-grid -->
+
+        <!-- 早期作品区 -->
+        <div class="early-works-section">
+            <div class="section-divider">
+                <div class="divider-line"></div>
+                <span class="divider-text">早期作品 · 早于 2023 年</span>
+                <div class="divider-line"></div>
+            </div>
+            <p style="text-align:center; font-size:0.82rem; color:rgba(200,215,230,0.3); margin-bottom:24px; font-weight:300;">
+                以下为未受 AI 影响时期的作品，言论不代表本人当下观点
+            </p>
+            <div class="early-works-grid">
+
+                <div class="early-work-card">
+                    <div class="early-work-inner">
+                        <h4 class="early-work-title">Hexo 博客主题改进</h4>
+                        <p class="early-work-desc">通过自学 HTML 语法对 Hexo 博客模板 Nexmoe 进行改进，为早期前端学习实践。</p>
+                        <a href="https://qtqtericchiu.github.io/blog" target="_blank" class="early-work-link interactable">
+                            访问博客
+                            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="early-work-card">
+                    <div class="early-work-inner">
+                        <h4 class="early-work-title">ePub 电子书作品</h4>
+                        <p class="early-work-desc">基于 HTML/CSS 构建的 ePub 格式电子书，通过 LightSnacks 项目发布。</p>
+                        <a href="https://lightsnacks.pages.dev/" target="_blank" class="early-work-link interactable">
+                            查看作品
+                            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+            </div><!-- /.early-works-grid -->
+        </div><!-- /.early-works-section -->
+
+    </div><!-- /.content-body -->
 
 </div><!-- /.main-stage -->
 
