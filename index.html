@@ -98,7 +98,7 @@
             padding: 40px;
         }
 
-        #blogModal, #leaveSiteModal, #qrModal {
+        #blogModal, #leaveSiteModal, #qrModal, #aiUpdateModal {
             height: auto;
             max-height: 60vh;
             max-width: 650px;
@@ -218,6 +218,21 @@
         </div>
     </div>
 
+    <!-- AI 能力页面上线提示弹窗 -->
+    <div class="about-modal" id="aiUpdateModal">
+        <button class="close-btn interactable" id="closeAiUpdateBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <div style="font-size: 3rem; margin-bottom: 20px;">🚀</div>
+        <h2 style="margin-bottom: 15px; font-weight: 500; letter-spacing: 2px; font-size: 1.8rem;">AI 能力页面全新上线</h2>
+        <p class="bio" style="text-align: center; margin-bottom: 10px;">探索我在 AI 辅助开发领域的实践与成果展示。</p>
+        <p class="bio" style="text-align: center; font-size: 0.85rem; color: rgba(200, 215, 230, 0.5);">包含系统级程序开发、HTML SPA 开发、Python 效率工具等多个板块。</p>
+        <div style="margin-top: 35px; display: flex; gap: 20px; width: 100%; justify-content: center;">
+            <button class="toggle-btn interactable" id="laterAiUpdateBtn" style="color: #fff; border-color: rgba(255,255,255,0.2);">暂不感兴趣</button>
+            <a href="ai/" class="toggle-btn page-link interactable" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">立即前往</a>
+        </div>
+    </div>
+
     <!-- 视频号二维码弹窗 -->
     <div class="about-modal" id="qrModal">
         <button class="close-btn interactable" id="closeQrBtn">
@@ -303,6 +318,45 @@
         var leaveSiteModal = document.getElementById('leaveSiteModal');
         var confirmLeaveBtn = document.getElementById('confirmLeaveBtn');
         var qrModal = document.getElementById('qrModal');
+        var aiUpdateModal = document.getElementById('aiUpdateModal');
+
+        /* ---- AI 能力页面上线提示（只显示一次） ---- */
+        if (aiUpdateModal) {
+            // 检查是否已显示过
+            var aiUpdateShown = localStorage.getItem('aiUpdateShown');
+            if (!aiUpdateShown) {
+                // 延迟 1.5 秒显示，让用户先看到主页
+                setTimeout(function() {
+                    aiUpdateModal.classList.add('active');
+                    entryPoints.classList.add('blurred');
+                    mocabolka.setDockState(true);
+                }, 1500);
+            }
+
+            // 关闭按钮
+            document.getElementById('closeAiUpdateBtn').addEventListener('click', function() {
+                aiUpdateModal.classList.remove('active');
+                entryPoints.classList.remove('blurred');
+                mocabolka.setDockState(false);
+                localStorage.setItem('aiUpdateShown', 'true');
+            });
+
+            // 暂不感兴趣按钮
+            document.getElementById('laterAiUpdateBtn').addEventListener('click', function() {
+                aiUpdateModal.classList.remove('active');
+                entryPoints.classList.remove('blurred');
+                mocabolka.setDockState(false);
+                localStorage.setItem('aiUpdateShown', 'true');
+            });
+
+            // 立即前往按钮（点击后也标记为已显示）
+            var aiUpdateLinks = aiUpdateModal.querySelectorAll('.page-link');
+            aiUpdateLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    localStorage.setItem('aiUpdateShown', 'true');
+                });
+            });
+        }
 
         document.getElementById('btn-about').addEventListener('click', function() {
             aboutModal.classList.add('active');
