@@ -720,13 +720,190 @@
         .subsection-block .project-card:nth-child(1) { animation-delay: 1.05s; }
         .subsection-block .project-card:nth-child(2) { animation-delay: 1.2s; }
         .subsection-block .project-card:nth-child(3) { animation-delay: 1.35s; }
-        /* 板块三：3 张 */
+        /* 板块三：1 张 AI Agent Skill */
         .section-block:nth-child(3) .project-card:nth-child(1) { animation-delay: 1.5s; }
-        .section-block:nth-child(3) .project-card:nth-child(2) { animation-delay: 1.65s; }
-        .section-block:nth-child(3) .project-card:nth-child(3) { animation-delay: 1.8s; }
+        /* 板块四：3 张 Python */
+        .section-block:nth-child(4) .project-card:nth-child(1) { animation-delay: 1.65s; }
+        .section-block:nth-child(4) .project-card:nth-child(2) { animation-delay: 1.8s; }
+        .section-block:nth-child(4) .project-card:nth-child(3) { animation-delay: 1.95s; }
 
         @keyframes cardIn {
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================================================================
+           News 浮窗样式
+           ================================================================ */
+        .news-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -45%) scale(0.95);
+            width: 75vw;
+            max-width: 720px;
+            max-height: 75vh;
+            background: rgba(10, 15, 20, 0.65);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 40px;
+            text-align: left;
+            overflow-y: auto;
+        }
+        .news-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .news-modal .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--accent-light);
+            font-size: 24px;
+            transition: color 0.3s, transform 0.3s;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: none;
+            z-index: 2;
+        }
+        .news-modal .close-btn:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        .news-modal .news-icon {
+            font-size: 2.4rem;
+            margin-bottom: 16px;
+        }
+        .news-modal .news-title {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+        .news-modal .news-title .accent {
+            background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .news-modal .news-item {
+            width: 100%;
+            margin-bottom: 22px;
+            padding: 20px;
+            background: rgba(154, 200, 226, 0.04);
+            border: 1px solid rgba(154, 200, 226, 0.1);
+            border-radius: 16px;
+            transition: border-color 0.3s;
+        }
+        .news-modal .news-item:hover {
+            border-color: rgba(154, 200, 226, 0.25);
+        }
+        .news-modal .news-item:last-child {
+            margin-bottom: 0;
+        }
+        .news-modal .news-item .news-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: rgba(154, 200, 226, 0.1);
+            border: 1px solid rgba(154, 200, 226, 0.15);
+            color: var(--accent-dark);
+        }
+        .news-modal .news-item .news-badge.primary {
+            background: linear-gradient(135deg, rgba(154, 200, 226, 0.2), transparent);
+            border-color: var(--accent-main);
+            color: var(--accent-light);
+        }
+        .news-modal .news-item .news-headline {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #fff;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .news-modal .news-item .news-desc {
+            font-size: 0.85rem;
+            color: rgba(200, 215, 230, 0.6);
+            line-height: 1.7;
+        }
+        .news-modal .news-item .news-desc a {
+            color: var(--accent-main);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .news-modal .news-item .news-desc a:hover {
+            color: var(--accent-light);
+            text-decoration: underline;
+        }
+        .news-modal .news-dismiss {
+            width: 100%;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .news-modal .news-dismiss button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 36px;
+            border-radius: 20px;
+            background: rgba(154, 200, 226, 0.08);
+            border: 1px solid rgba(154, 200, 226, 0.15);
+            color: var(--accent-light);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: none;
+            transition: all 0.3s;
+        }
+        .news-modal .news-dismiss button:hover {
+            background: rgba(154, 200, 226, 0.15);
+            border-color: var(--accent-main);
+            color: #fff;
+        }
+        .news-modal .news-subtitle {
+            font-size: 0.8rem;
+            color: rgba(200, 215, 230, 0.35);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        /* News 遮罩 */
+        .news-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 49;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+        .news-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 离开站点弹窗尺寸 */
+        #leaveSiteModal {
+            height: auto;
+            max-height: 60vh;
+            max-width: 650px;
+            padding: 40px 30px;
         }
 
         /* ================================================================
@@ -756,6 +933,17 @@
             .ai-usage-grid { grid-template-columns: 1fr; gap: 12px; }
             .ai-usage-card { padding: 16px; }
             .ai-usage-sub-grid { grid-template-columns: 1fr; gap: 10px; }
+            .news-modal {
+                width: 90vw;
+                padding: 28px 18px;
+                max-height: 80vh;
+            }
+            #leaveSiteModal {
+                padding: 28px 18px;
+            }
+            .news-modal .news-title { font-size: 1.3rem; }
+            .news-modal .news-item { padding: 16px; }
+            .news-modal .news-item .news-headline { font-size: 1rem; }
         }
     </style>
 </head>
@@ -774,6 +962,55 @@
         <div class="sw-btn interactable" onclick="mocabolka.changeBg(1)" style="background-image:url('https://s1.1ovv.com/2026/03/21/IxkP.png')"></div>
         <div class="sw-btn interactable" onclick="mocabolka.changeBg(2)" style="background-image:url('https://s1.1ovv.com/2026/03/21/I5rf.png')"></div>
         <div class="sw-btn interactable" onclick="mocabolka.changeBg(3)" style="background-image:url('https://s1.1ovv.com/2026/03/21/I5Wi.png')"></div>
+    </div>
+
+    <!-- News 遮罩 -->
+    <div class="news-overlay" id="newsOverlay"></div>
+
+    <!-- News 浮窗 -->
+    <div class="news-modal" id="newsModal">
+        <button class="close-btn interactable" id="closeNewsBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <div class="news-icon">📢</div>
+        <h2 class="news-title">最新 <span class="accent">动向</span></h2>
+        <p class="news-subtitle">mocabolka 的最新动态与项目更新</p>
+
+        <div class="news-item">
+            <span class="news-badge primary">🔔 最新</span>
+            <div class="news-headline">推出 <strong>NuanSkill</strong> — 无限暖暖综合管理 AI Agent Skill</div>
+            <div class="news-desc">
+                已发布至 <a href="https://github.com/qtqtEricChiu/nuanskill-infinitynikki-helper" target="_blank">GitHub</a>，支持 Marvis、QClaw 等应用导入。
+                核心功能涵盖 Steam 版本管理（ACF 反更新 / SteamDB 自动检测 / 骨架化清理）、
+                奇想手账（体力 / 美鸭梨 / 抽卡统计 / 探索进度）及公开信息查询（兑换码 / 氪条）。
+            </div>
+        </div>
+
+        <div class="news-item">
+            <span class="news-badge">更新</span>
+            <div class="news-headline">InfiSteam 推出 WinUI 3 现代样式版本</div>
+            <div class="news-desc">
+                为 <a href="https://github.com/qtqtEricChiu/InfiSteam" target="_blank">InfiSteam</a> 编译并推出 WinUI 3 现代样式版本，
+                带来更统一流畅的操作体验。同时为 AI Prompt 版本提供绝区零等游戏通用兼容性支持。
+            </div>
+        </div>
+
+        <div class="news-dismiss">
+            <button class="interactable" id="dismissNewsBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <!-- 离开站点提示弹窗 -->
+    <div class="about-modal" id="leaveSiteModal">
+        <h2 style="margin-bottom: 20px; font-weight: 500; letter-spacing: 2px;">温馨提示</h2>
+        <p class="bio" style="text-align: center; max-width: 90%;">您即将离开本站，前往外部链接。<br>请注意您的账号和财产安全。</p>
+        <div style="margin-top: 35px; display: flex; gap: 20px; width: 100%; justify-content: center;">
+            <button class="toggle-btn interactable" id="cancelLeaveBtn" style="color: #fff; border-color: rgba(255,255,255,0.2);">取消前往</button>
+            <a href="#" id="confirmLeaveBtn" target="_blank" class="toggle-btn interactable" style="background: rgba(154, 200, 226, 0.2); border-color: var(--accent-main);">继续前往</a>
+        </div>
     </div>
 
     <div class="top-nav">
@@ -886,8 +1123,44 @@
             </div>
             <div class="section-grid">
 
-                <!-- InfiMouse -->
+                <!-- InfiSteam (旗舰) -->
                 <div class="project-card flagship has-custom-icon">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <img src="https://github.com/qtqtEricChiu/InfiSteam/raw/main/ico.png" alt="InfiSteam">
+                            </div>
+                            <div class="card-title-block">
+                                <div class="card-path">WinUI 3 / C# · Python · PowerShell</div>
+                                <h3 class="card-title">InfiSteam · 无限暖暖启动管理</h3>
+                            </div>
+                            <a href="https://github.com/qtqtEricChiu/InfiSteam" target="_blank" class="card-github-link interactable">
+                                <img src="../res/img/svg/gh.svg" alt="GitHub">
+                            </a>
+                        </div>
+                        <p class="card-desc">
+                            无限暖暖 Steam 高级启动管理工具。防止 Steam 误判版本过期并自动重置本地文件完整性，通过伪造 ACF 版本信息 + Chrome CDP 自动抓取 SteamDB 最新 BuildID / Manifest GID，实现一键版本同步。全新上线 WinUI 3 现代桌面版，支持 AI Agent 全自动检测 / WinUI 3 桌面版 / WPF 桌面版 / Python GUI 单文件程序 / PowerShell 命令行五种操作方式。
+                        </p>
+                        <div class="card-tags">
+                            <span class="tag">ACF 伪造</span>
+                            <span class="tag">Chrome CDP</span>
+                            <span class="tag">SteamDB 同步</span>
+                            <span class="tag">WinUI 3</span>
+                            <span class="tag">AI Agent 兼容</span>
+                            <span class="tag">多入口设计</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-tech">WinUI 3 · C# · Python · PowerShell · Steam ACF</span>
+                            <a href="https://github.com/qtqtEricChiu/InfiSteam/releases" target="_blank" class="card-link interactable">
+                                GitHub Releases
+                                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- InfiMouse -->
+                <div class="project-card has-custom-icon">
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon">
@@ -915,41 +1188,6 @@
                         <div class="card-footer">
                             <span class="card-tech">C# · WinUI 3 · SendInput · XInput</span>
                             <a href="https://github.com/qtqtEricChiu/InfiMouse" target="_blank" class="card-link interactable">
-                                GitHub
-                                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- InfiSteam -->
-                <div class="project-card has-custom-icon">
-                    <div class="card-inner">
-                        <div class="card-header">
-                            <div class="card-icon">
-                                <img src="https://github.com/qtqtEricChiu/InfiSteam/raw/main/ico.png" alt="InfiSteam">
-                            </div>
-                            <div class="card-title-block">
-                                <div class="card-path">Python / C# / PowerShell</div>
-                                <h3 class="card-title">InfiSteam · 无限暖暖启动管理</h3>
-                            </div>
-                            <a href="https://github.com/qtqtEricChiu/InfiSteam" target="_blank" class="card-github-link interactable">
-                                <img src="../res/img/svg/gh.svg" alt="GitHub">
-                            </a>
-                        </div>
-                        <p class="card-desc">
-                            防止 Steam 误判版本过期并自动重置本地文件完整性，通过伪造 ACF 版本信息 + Chrome CDP 自动抓取 SteamDB 最新 BuildID，实现一键版本同步。支持 AI Agent 全自动检测 / Python GUI / PowerShell 命令行三种操作方式。
-                        </p>
-                        <div class="card-tags">
-                            <span class="tag">ACF 伪造</span>
-                            <span class="tag">Chrome CDP</span>
-                            <span class="tag">SteamDB 同步</span>
-                            <span class="tag">AI Agent 兼容</span>
-                            <span class="tag">多入口设计</span>
-                        </div>
-                        <div class="card-footer">
-                            <span class="card-tech">Python · C# · PowerShell · Steam ACF</span>
-                            <a href="https://github.com/qtqtEricChiu/InfiSteam" target="_blank" class="card-link interactable">
                                 GitHub
                                 <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                             </a>
@@ -1126,7 +1364,7 @@
                             </div>
                             <div class="card-footer">
                                 <span class="card-tech">HTML / CSS / JS · 视觉特效</span>
-                                <a href="https://qtqtericchiu.github.io/" target="_blank" class="card-link interactable">
+                                <a href="https://qtqtericchiu.github.io/world" target="_blank" class="card-link interactable">
                                     访问网站
                                     <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                 </a>
@@ -1208,10 +1446,60 @@
 
         </div><!-- /.section-block -->
 
-        <!-- ==================== 板块三：Python 效率工具生成 ==================== -->
+        <!-- ==================== 板块三：AI Agent Skill ==================== -->
         <div class="section-block">
             <div class="section-header">
                 <div class="section-num">03</div>
+                <div class="section-header-text">
+                    <h2 class="section-title">AI Agent <span class="accent">Skill</span></h2>
+                    <p class="section-desc">面向 AI Agent 平台（Marvis、QClaw、OpenClaw、WorkBuddy）的专用 Skill，支持自然语言交互与自动化操作。</p>
+                </div>
+            </div>
+            <div class="section-grid">
+
+                <!-- NuanSkill -->
+                <div class="project-card flagship has-custom-icon">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <img src="https://github.com/qtqtEricChiu/nuanskill-infinitynikki-helper/raw/main/icon.png" alt="NuanSkill">
+                            </div>
+                            <div class="card-title-block">
+                                <div class="card-path">AI Agent Skill · v1.4.0</div>
+                                <h3 class="card-title">NuanSkill · 无限暖暖综合管理</h3>
+                            </div>
+                            <a href="https://github.com/qtqtEricChiu/nuanskill-infinitynikki-helper" target="_blank" class="card-github-link interactable">
+                                <img src="../res/img/svg/gh.svg" alt="GitHub">
+                            </a>
+                        </div>
+                        <p class="card-desc">
+                            无限暖暖综合管理 AI Agent Skill，支持 Marvis、QClaw、OpenClaw、WorkBuddy 等平台导入。核心功能涵盖 Steam 版本管理（ACF 反更新 / SteamDB 自动检测 / 骨架化清理）、奇想手账（体力 / 美鸭梨 / 抽卡统计 / 探索进度）及公开信息查询（兑换码 / 氪条）。支持自然语言指令操作，Agent 自动完成数据采集与处理。
+                        </p>
+                        <div class="card-tags">
+                            <span class="tag">Marvis 兼容</span>
+                            <span class="tag">QClaw 兼容</span>
+                            <span class="tag">ACF 反更新</span>
+                            <span class="tag">SteamDB 检测</span>
+                            <span class="tag">奇想手账</span>
+                            <span class="tag">抽卡统计</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-tech">PowerShell · Python · Chrome CDP · ACF</span>
+                            <a href="https://github.com/qtqtEricChiu/nuanskill-infinitynikki-helper" target="_blank" class="card-link interactable">
+                                GitHub
+                                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /.section-grid -->
+        </div><!-- /.section-block -->
+
+        <!-- ==================== 板块四：Python 效率工具生成 ==================== -->
+        <div class="section-block">
+            <div class="section-header">
+                <div class="section-num">04</div>
                 <div class="section-header-text">
                     <h2 class="section-title">Python <span class="accent">效率工具</span></h2>
                     <p class="section-desc">一次性专用工具，针对特定场景快速生成，专为提高效率而生。AI 辅助完成核心逻辑与 GUI 设计。</p>
@@ -1362,6 +1650,70 @@
             }
             requestAnimationFrame(gyroStageLoop);
         }
+
+        /* ================================================================
+           News 浮窗逻辑
+           ================================================================ */
+        const newsModal = document.getElementById('newsModal');
+        const newsOverlay = document.getElementById('newsOverlay');
+        const closeNewsBtn = document.getElementById('closeNewsBtn');
+        const dismissNewsBtn = document.getElementById('dismissNewsBtn');
+
+        function showNews() {
+            newsModal.classList.add('active');
+            newsOverlay.classList.add('active');
+        }
+        function hideNews() {
+            newsModal.classList.remove('active');
+            newsOverlay.classList.remove('active');
+        }
+
+        if (closeNewsBtn) closeNewsBtn.addEventListener('click', hideNews);
+        if (dismissNewsBtn) dismissNewsBtn.addEventListener('click', hideNews);
+        if (newsOverlay) newsOverlay.addEventListener('click', hideNews);
+
+        // 页面加载后自动弹出
+        setTimeout(showNews, 600);
+
+        /* ================================================================
+           离开站点浮窗逻辑
+           ================================================================ */
+        var leaveSiteModal = document.getElementById('leaveSiteModal');
+        var confirmLeaveBtn = document.getElementById('confirmLeaveBtn');
+        var cancelLeaveBtn = document.getElementById('cancelLeaveBtn');
+
+        function openLeaveSite(url) {
+            if (leaveSiteModal && confirmLeaveBtn) {
+                leaveSiteModal.classList.add('active');
+                confirmLeaveBtn.href = url;
+            }
+        }
+
+        function closeLeaveSite() {
+            if (leaveSiteModal) {
+                leaveSiteModal.classList.remove('active');
+            }
+        }
+
+        if (cancelLeaveBtn) {
+            cancelLeaveBtn.addEventListener('click', closeLeaveSite);
+        }
+        if (confirmLeaveBtn) {
+            confirmLeaveBtn.addEventListener('click', function() {
+                closeLeaveSite();
+            });
+        }
+
+        // 拦截所有项目卡片中指向外部链接的点击
+        document.querySelectorAll('.card-link, .card-github-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                var href = this.getAttribute('href');
+                if (href && href.indexOf('http') === 0 && href.indexOf('qtqtericchiu.github.io') === -1 && href.indexOf(window.location.hostname) === -1) {
+                    e.preventDefault();
+                    openLeaveSite(href);
+                }
+            });
+        });
     });
 </script>
 
