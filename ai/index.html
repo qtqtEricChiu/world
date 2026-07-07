@@ -826,6 +826,14 @@
             border: 1px solid rgba(154, 200, 226, 0.15);
             color: var(--accent-dark);
         }
+        .news-modal .news-date {
+            display: inline-block;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            color: rgba(200, 215, 230, 0.3);
+            margin-left: 10px;
+            vertical-align: middle;
+        }
         .news-modal .news-item .news-badge.primary {
             background: linear-gradient(135deg, rgba(154, 200, 226, 0.2), transparent);
             border-color: var(--accent-main);
@@ -978,6 +986,20 @@
 
         <div class="news-item">
             <span class="news-badge primary">🔔 最新</span>
+            <span class="news-date">2026-07</span>
+            <div class="news-headline"><strong>Muse</strong> 持续演进至 v3.5.0 — 性能优化 + 背景沉浸 + WCO 假沉浸标题栏</div>
+            <div class="news-desc">
+                <a href="https://github.com/qtqtEricChiu/muse" target="_blank">Muse</a> 从 v3.0.2 迭代至 v3.5.0，带来多项重要更新：<br>
+                <strong>⚡ 性能优化</strong>：曲库/播放列表搜索 180ms 防抖、coverflow 增量渲染、大播放列表分块渲染（200 同步 + rAF 分批）、元数据 Web Worker 解析、<code>saveSettings</code> 400ms 节流落盘；<br>
+                <strong>🎨 视觉升级</strong>：设置新增「跟随强调色」与「背景沉浸」开关，沉浸舱取色背景实时跟随，歌词栏美学与结构修复；<br>
+                <strong>🪟 WCO 假沉浸</strong>：Windows Chrome PWA 隐藏标题栏时顶部取色填充系统金刚键背景，随切歌实时更新；<br>
+                <strong>🎮 手柄全流程修复</strong>：滑块焦点导航、右摇杆无级音量/歌词滚动、键位指引补全、长音频断点续播等多项深度优化。
+            </div>
+        </div>
+
+        <div class="news-item">
+            <span class="news-badge">更新</span>
+            <span class="news-date">2026-07</span>
             <div class="news-headline"><strong>Muse</strong> 发布 v3.0 大版本 — 音频 + 手柄震动反馈系统</div>
             <div class="news-desc">
                 <a href="https://github.com/qtqtEricChiu/muse" target="_blank">Muse</a> 推出 v3.0 大版本（涵盖 v2.9.0 → v3.0.2），
@@ -990,6 +1012,7 @@
 
         <div class="news-item">
             <span class="news-badge">更新</span>
+            <span class="news-date">2026-06</span>
             <div class="news-headline">推出 <strong>NuanSkill</strong> — 无限暖暖综合管理 AI Agent Skill</div>
             <div class="news-desc">
                 已发布至 <a href="https://github.com/qtqtEricChiu/nuanskill-infinitynikki-helper" target="_blank">GitHub</a>，支持 Marvis、QClaw 等应用导入。
@@ -1000,6 +1023,7 @@
 
         <div class="news-item">
             <span class="news-badge">更新</span>
+            <span class="news-date">2026-06</span>
             <div class="news-headline">InfiSteam 推出 WinUI 3 现代样式版本</div>
             <div class="news-desc">
                 为 <a href="https://github.com/qtqtEricChiu/InfiSteam" target="_blank">InfiSteam</a> 编译并推出 WinUI 3 现代样式版本，
